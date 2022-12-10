@@ -50,7 +50,7 @@ def insert_to_words(wordID, word, length):
                                     IF NOT EXISTS (SELECT * FROM words 
                                                     WHERE word = ?)
                                     BEGIN
-                                        INSERT INTO songs (word, wordID, length)
+                                        INSERT INTO words (word, wordID, length)
                                         VALUES (?, ?, ?)
                                     END
                                 END"""
@@ -70,3 +70,42 @@ def insert_to_words(wordID, word, length):
         print()
         exit()
 #----------------------------insert_to_words----------------------------#
+
+#--------------------------insert_to_wordIndex--------------------------#
+def insert_to_wordIndex(wordID,songID,paragraph,line,index):
+
+    # Exception Handling
+    try:
+        # Trusted Connection to Named Instance 
+        connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+
+        cursor=connection.cursor()
+
+        sql_insert_to_wordIndex = """BEGIN
+                                    IF NOT EXISTS (SELECT * FROM words 
+                                                    WHERE wordID = ?,
+                                                    and songID = ?,
+                                                    and paragraph = ?,
+                                                    and line = ?,
+                                                    and index = ?)
+                                    BEGIN
+                                        INSERT INTO wordIndex (wordID,songID,paragraph,line,index)
+                                        VALUES (?, ?, ?, ?, ?)
+                                    END
+                                END"""
+
+        # insert to table wordsIndex
+        cursor.execute(sql_insert_to_wordIndex, wordID,songID,paragraph,line,index,wordID,songID,paragraph,line,index)
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+    except pyodbc.Error as ex:
+        print("Exception: ",ex)
+        cursor.close()
+        connection.close()
+        print("Closing program...")
+        print()
+        exit()
+#--------------------------insert_to_wordIndex--------------------------#
