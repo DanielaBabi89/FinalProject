@@ -8,36 +8,46 @@ import re
 import pandas
 import numpy
 
-##--------------------------------------song_file_to_table----------------------------------------##
-def song_file_to_table (path, fileName):
-    path = "C:\\Users\\babid\\Documents\\SQL Server Management Studio\\Witness - Ketty Perry.txt"
-    fileName = "Witness - Ketty Perry"
+# TODO: Pasrse txt to WordIndex table
+
+def txt_to_table (src, dst, fileName):
+    songName = fileName.split(" - ")[0]
+    artist = fileName.split(" - ")[1]
+
+    columnNames = ["word","song", "artist","paragraph","line","index"]
+    finalTable = pandas.DataFrame(columns=columnNames)
+
+    with open(src, 'r', encoding='utf-8') as f:
+        fullSong = f.read()
+
+    charctersToAvoid = "!#$%^&*(),.?" 
+    for charcter in charctersToAvoid:
+        fullSong = fullSong.replace(charcter, " ")
+
+    #split text into paaragraphs
+    paragraphs = fullSong.split('\n\n')
+
+    #split each paragraph into lines
+    paragraphCounter = 1 
+    lineCounter = 1
+    wordCounter = 1
+    for par in paragraphs:
+        lines = par.split("\n")
+        for line in lines:
+            words = line.split()
+            for word in words:
+                newLineToLoad = [word,songName,artist,paragraphCounter,lineCounter,wordCounter]
+                wordCounter+=1
+                finalTable.loc[len(finalTable.index)] = newLineToLoad
+            lineCounter+=1
+        paragraphCounter+=1
+    finalTable.to_csv(dst)
+
+
+src = "C:\\Users\\babid\\Desktop\\FinalProject\\songsTXT\\Witness - Ketty Perry.txt"
+dst = "C:\\Users\\babid\\Desktop\\FinalProject\\songsCSV\\Witness - Ketty Perry(toLoad).csv"
+fileName = "Witness - Ketty Perry"
+txt_to_table (src, dst, fileName)
+
     
-    #Splitting the song to list of words
-    with open(path, 'r', encoding='utf-8') as f:
-        words = f.readlines()
-        words = ' '.join(words)
-        words = words.replace("? ", ' ')
-    splitedWords = re.split("[\s,?)('.]+", words)
-    
-
-    #create 3 columns
-    df = pandas.DataFrame(splitedWords)  
-    df.columns = ['word']
-    df.insert(1,"times",[""]*(len(splitedWords)))
-    df = df.groupby("word").count()
-
-    songName = [(re.split(" - ",fileName))[0]]*(len(df))
-    Artist = [(re.split("- ",fileName))[1]]*(len(df))
-    Album = []
-
-    #add columns to dataframe
-    df.insert(1,"songName",songName)
-    df.insert(2,"Artist",Artist)
-
-    
-    #create new file with table formatting
-    df.to_csv(r'C:\\Users\\babid\\Documents\\SQL Server Management Studio\\toload Witness - Ketty Perry.txt', sep = "\t")
-##--------------------------------------song_file_to_table----------------------------------------##
-
 
