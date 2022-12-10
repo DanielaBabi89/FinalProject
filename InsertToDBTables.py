@@ -36,6 +36,7 @@ def insert_to_songs(songID, song, artist, txtlink):
         exit()
 #----------------------------insert_to_songs----------------------------#
 
+# TODO: convet to multiple add - from dataframe
 #----------------------------insert_to_words----------------------------#
 def insert_to_words(wordID, word, length):
 
@@ -71,6 +72,7 @@ def insert_to_words(wordID, word, length):
         exit()
 #----------------------------insert_to_words----------------------------#
 
+# TODO: convet to multiple add - from dataframe
 #--------------------------insert_to_wordIndex--------------------------#
 def insert_to_wordIndex(wordID,songID,paragraph,line,index):
 
