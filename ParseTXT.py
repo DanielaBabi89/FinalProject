@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Oct 10 09:14:00 2022
-
-@author: babid
-"""
 import re
 import pandas
 import numpy
