@@ -5,11 +5,13 @@ import numpy
 # TODO: Parse txt to WordIndex table
 
 def txt_to_table (src, dst, fileName):
+    #-----create song DF--------
     songName = fileName.split(" - ")[0]
     artist = fileName.split(" - ")[1]
+    songs_table = pandas.DataFrame({'songID':[1],'song': [songName], 'artist': [artist], 'txtlink': [src]})
 
     #-----create wordsIndex DF--------
-    wordIndex_columnNames = ["word","song", "artist","paragraph","line","index"]
+    wordIndex_columnNames = ["word","song","paragraph","line","index"]
     wordIndex_table = pandas.DataFrame(columns=wordIndex_columnNames)
 
     with open(src, 'r', encoding='utf-8') as f:
@@ -29,9 +31,10 @@ def txt_to_table (src, dst, fileName):
     for par in paragraphs:
         lines = par.split("\n")
         for line in lines:
+            #split each line into words
             words = line.split()
             for word in words:
-                newLineToLoad = [word,songName,artist,paragraphCounter,lineCounter,wordCounter]
+                newLineToLoad = [word,songName,paragraphCounter,lineCounter,wordCounter]
                 wordCounter+=1
                 wordIndex_table.loc[len(wordIndex_table.index)] = newLineToLoad
             lineCounter+=1
@@ -52,7 +55,14 @@ def txt_to_table (src, dst, fileName):
         words_table.loc[len(words_table)] = newLineToLoad
         wordID += 1
     
+    #------update wordsIndex df - add wordID + songID column------
+    wordIndex_table = wordIndex_table.merge(words_table, how="left", on="word")
+    wordIndex_table = wordIndex_table.merge(songs_table, how="left", on= "song")
+    wordIndex_table = wordIndex_table.drop(columns=['song','artist', 'word', 'txtlink'])
 
+
+    return songs_table, words_table, wordIndex_table
+    
 src = "C:\\Users\\babid\\Desktop\\FinalProject\\songsTXT\\Witness - Ketty Perry.txt"
 dst = "C:\\Users\\babid\\Desktop\\FinalProject\\songsCSV\\Witness - Ketty Perry(toLoad).csv"
 fileName = "Witness - Ketty Perry"
