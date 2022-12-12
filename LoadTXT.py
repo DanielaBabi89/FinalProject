@@ -66,7 +66,7 @@ def txt_to_table (src, dst, fileName, last_songID, last_wordID):
     wordIndex_table = wordIndex_table.merge(words_table, how="left", on="word")
     wordIndex_table = wordIndex_table.merge(songs_table, how="left", on= "song")
     wordIndex_table = wordIndex_table.drop(columns=['song','artist', 'word', 'txtlink'])
-
+    print(wordIndex_table)
 
     return songs_table, words_table, wordIndex_table
 
@@ -135,7 +135,7 @@ def load_song_to_DB(src, dst, fileName):
     
     #insert song to wordIndex
     for index, row in wordIndex_table.iterrows():
-        insert_to_wordIndex(row['wordID'], row['songID'], row['paragraph'], row['line'], row['index'])
+        insert_to_wordIndex(int(row['wordID']), int(row['songID']), int(row['paragraph']), int(row['line']), int(row['index']))
 
 
 
@@ -143,7 +143,3 @@ src = "C:\\Users\\babid\\Desktop\\FinalProject\\songsTXT\\Witness - Ketty Perry.
 dst = "C:\\Users\\babid\\Desktop\\FinalProject\\songsCSV\\Witness - Ketty Perry(toLoad).csv"
 fileName = "Witness - Ketty Perry"
 load_song_to_DB(src, dst, fileName)
-#print(is_word_exist("that"))
-# assume that it's a new song (checked before)
-# for each word - 
-#   1. first check if already exist. yes - use this wordID. no - continue from last ID

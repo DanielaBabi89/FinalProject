@@ -84,14 +84,14 @@ def insert_to_wordIndex(wordID,songID,paragraph,line,index):
         cursor=connection.cursor()
 
         sql_insert_to_wordIndex = """BEGIN
-                                    IF NOT EXISTS (SELECT * FROM words 
-                                                    WHERE wordID = ?,
-                                                    and songID = ?,
-                                                    and paragraph = ?,
-                                                    and line = ?,
-                                                    and index = ?)
+                                    IF NOT EXISTS (SELECT * FROM wordIndex 
+                                                    WHERE wordID = ?
+                                                    and songID = ?
+                                                    and paragraph = ?
+                                                    and line = ?
+                                                    and indexNum = ?)
                                     BEGIN
-                                        INSERT INTO wordIndex (wordID,songID,paragraph,line,index)
+                                        INSERT INTO wordIndex (wordID,songID,paragraph,line,indexNum)
                                         VALUES (?, ?, ?, ?, ?)
                                     END
                                 END"""
