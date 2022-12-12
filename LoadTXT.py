@@ -5,11 +5,11 @@ import pyodbc
 
 # TODO: Parse txt to WordIndex table
 
-def txt_to_table (src, dst, fileName):
+def txt_to_table (src, dst, fileName, last_songID, last_wordID):
     #-----create song DF--------
     songName = fileName.split(" - ")[0]
     artist = fileName.split(" - ")[1]
-    songs_table = pandas.DataFrame({'songID':[1],'song': [songName], 'artist': [artist], 'txtlink': [src]})
+    songs_table = pandas.DataFrame({'songID':[last_songID],'song': [songName], 'artist': [artist], 'txtlink': [src]})
 
     #-----create wordsIndex DF--------
     wordIndex_columnNames = ["word","song","paragraph","line","index"]
@@ -48,7 +48,7 @@ def txt_to_table (src, dst, fileName):
     
     words_list = pandas.Series(wordIndex_table.word).to_list()
     words_list = list(dict.fromkeys(words_list))
-    wordID = 1
+    wordID = last_wordID
     
     #fil words DF
     for word in words_list:
@@ -64,14 +64,29 @@ def txt_to_table (src, dst, fileName):
 
     return songs_table, words_table, wordIndex_table
 
-src = "C:\\Users\\babid\\Desktop\\FinalProject\\songsTXT\\Witness - Ketty Perry.txt"
-dst = "C:\\Users\\babid\\Desktop\\FinalProject\\songsCSV\\Witness - Ketty Perry(toLoad).csv"
-fileName = "Witness - Ketty Perry"
-#txt_to_table (src, dst, fileName)
+def is_word_exist(word):
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
 
-# TODO: FUNCTION : get song as txt file > parse file to df > add to words + songs + wordIndex tables
+    #find last wordID to continue from it
+    sql_get_wordID= """select wordID as ID
+                        from words
+                        where word = ?"""
+    cursor.execute(sql_get_wordID, word)
+    
+    # return id if the word was found. else return -1 
+    row = cursor.fetchone()
+    if(row == None):
+        id = -1
+    else:
+        id = row.ID
+
+    cursor.close()
+    connection.close()
+
+    return id
    
-def load_song_to_DB():
+def load_song_to_DB(src, dst, fileName):
     # TODO: find the last wordID, songID number.
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
@@ -93,12 +108,20 @@ def load_song_to_DB():
     cursor.close()
     connection.close()
     
-    #parse song to wordIndex
-
-    #parse song to words    
-    #parse song to songs
+    #parse song to wordIndex + words + songs
+    songs_table, words_table, wordIndex_table = txt_to_table (src, dst, fileName, last_songID+1, last_wordID+1)
 
     #insert song to wordIndex
     #insert song to words
     #insert song to songs
     print()
+
+
+src = "C:\\Users\\babid\\Desktop\\FinalProject\\songsTXT\\Witness - Ketty Perry.txt"
+dst = "C:\\Users\\babid\\Desktop\\FinalProject\\songsCSV\\Witness - Ketty Perry(toLoad).csv"
+fileName = "Witness - Ketty Perry"
+#load_song_to_DB(src, dst, fileName)
+#print(is_word_exist("that"))
+# assume that it's a new song (checked before)
+# for each word - 
+#   1. first check if already exist. yes - use this wordID. no - continue from last ID
