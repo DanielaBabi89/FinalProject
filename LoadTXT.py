@@ -1,6 +1,7 @@
 import re
 import pandas
 import numpy
+import pyodbc
 
 # TODO: Parse txt to WordIndex table
 
@@ -62,18 +63,39 @@ def txt_to_table (src, dst, fileName):
 
 
     return songs_table, words_table, wordIndex_table
-    
+
 src = "C:\\Users\\babid\\Desktop\\FinalProject\\songsTXT\\Witness - Ketty Perry.txt"
 dst = "C:\\Users\\babid\\Desktop\\FinalProject\\songsCSV\\Witness - Ketty Perry(toLoad).csv"
 fileName = "Witness - Ketty Perry"
-txt_to_table (src, dst, fileName)
+#txt_to_table (src, dst, fileName)
 
 # TODO: FUNCTION : get song as txt file > parse file to df > add to words + songs + wordIndex tables
    
 def load_song_to_DB():
+    # TODO: find the last wordID, songID number.
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    #find last wordID to continue from it
+    sql_max_wordID= """select wordID as max
+                        from words
+                        where wordID = (select MAX(wordID) from words)"""
+    cursor.execute(sql_max_wordID)
+    last_wordID = cursor.fetchone().max
+
+    #find last songID to continue from it
+    sql_max_wordID= """select songID as max
+                        from songs
+                        where songID = (select MAX(songID) from songs)"""
+    cursor.execute(sql_max_wordID)
+    last_songID = cursor.fetchone().max
+
+    cursor.close()
+    connection.close()
+    
     #parse song to wordIndex
 
-    #parse song to words
+    #parse song to words    
     #parse song to songs
 
     #insert song to wordIndex
