@@ -2,6 +2,7 @@ import re
 import pandas
 import numpy
 import pyodbc
+from InsertToDBTables import *
 
 # TODO: Parse txt to WordIndex table
 
@@ -90,9 +91,9 @@ def get_word_id(word):
     connection.close()
 
     return id
-   
-def load_song_to_DB(src, dst, fileName):
-    # TODO: find the last wordID, songID number.
+
+def get_last_id_from_DB ():
+    #return the last ID that in the DB tables: words and songs
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
 
@@ -112,20 +113,36 @@ def load_song_to_DB(src, dst, fileName):
 
     cursor.close()
     connection.close()
+
+    return last_songID, last_wordID
+
+def load_song_to_DB(src, dst, fileName):
+    # input: source and destination path, and the name of the file
+    # parse txt file > create 3 dataframes: songs, words, wordIndex > load to DB with SQL.
+
+    last_songID, last_wordID = get_last_id_from_DB()
     
     #parse song to wordIndex + words + songs
-    songs_table, words_table, wordIndex_table = txt_to_table (src, dst, fileName, last_songID+1, last_wordID+1)
-
-    #insert song to wordIndex
-    #insert song to words
+    songs_table, words_table, wordIndex_table = txt_to_table (src, dst, fileName, last_songID + 1, last_wordID + 1)
+    
     #insert song to songs
-    print()
+    for index, row in songs_table.iterrows():
+        insert_to_songs(row['songID'], row['song'], row['artist'], row['txtlink'])
+
+    #insert song to words
+    for index, row in words_table.iterrows():
+        insert_to_words(row['wordID'], row['word'], row['length'])
+    
+    #insert song to wordIndex
+    for index, row in wordIndex_table.iterrows():
+        insert_to_wordIndex(row['wordID'], row['songID'], row['paragraph'], row['line'], row['index'])
+
 
 
 src = "C:\\Users\\babid\\Desktop\\FinalProject\\songsTXT\\Witness - Ketty Perry.txt"
 dst = "C:\\Users\\babid\\Desktop\\FinalProject\\songsCSV\\Witness - Ketty Perry(toLoad).csv"
 fileName = "Witness - Ketty Perry"
-#load_song_to_DB(src, dst, fileName)
+load_song_to_DB(src, dst, fileName)
 #print(is_word_exist("that"))
 # assume that it's a new song (checked before)
 # for each word - 
