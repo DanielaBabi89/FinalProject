@@ -22,7 +22,7 @@ def txt_to_table (src, dst, fileName, last_songID, last_wordID):
     for charcter in charctersToAvoid:
         fullSong = fullSong.replace(charcter, " ")
 
-    #split text into paaragraphs
+    #split text into paragraphs
     paragraphs = fullSong.split('\n\n')
 
     #split each paragraph into lines
@@ -52,9 +52,14 @@ def txt_to_table (src, dst, fileName, last_songID, last_wordID):
     
     #fil words DF
     for word in words_list:
-        newLineToLoad = [wordID, word, len(word)]
-        words_table.loc[len(words_table)] = newLineToLoad
-        wordID += 1
+        id = get_word_id(word)
+        if (id == -1):
+            newLineToLoad = [wordID, word, len(word)]
+            words_table.loc[len(words_table)] = newLineToLoad
+            wordID += 1
+        else:
+            newLineToLoad = [id, word, len(word)]
+            words_table.loc[len(words_table)] = newLineToLoad      
     
     #------update wordsIndex df - add wordID + songID column------
     wordIndex_table = wordIndex_table.merge(words_table, how="left", on="word")
@@ -64,7 +69,7 @@ def txt_to_table (src, dst, fileName, last_songID, last_wordID):
 
     return songs_table, words_table, wordIndex_table
 
-def is_word_exist(word):
+def get_word_id(word):
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
 
