@@ -16,25 +16,32 @@ def get_song_by_name(song_name):
                         WHERE [song] = ?"""
     cursor.execute(sql_find_song, song_name)
     
-    # return txt link if the song was found. else return None 
+    # Define DataFrame according to the SQL query
+    songs_df = pandas.DataFrame(columns=['songID', 'song', 'artist', 'txtlink'])
+
+    # add results of the query to DF
     row = cursor.fetchone()
-    if(row == None):
-        song = None
-    else:
-        song = {'song': row.song, 'artist': row.artist, 'txtlink':row.txtlink}
+    if(row != None):
+        while row is not None:
+            songs_df.loc[len(songs_df)] = [row.songID,
+                                            row.song,
+                                            row.artist,
+                                            row.txtlink]
+            row = cursor.fetchone()
+
 
     cursor.close()
     connection.close()
-    return song
+    return songs_df
 
 
 def get_songs_by_artist(artist):
-    # get song name
-    # return the rellavent row from DB if exist (as dictionary), else return {}
+    # get artist name
+    # return DF with the rellavent rows from DB
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
 
-    #find song by given song name
+    #find song by given artist name
     sql_find_song = """SELECT [songID]
                             ,[song]
                             ,[artist]
@@ -43,19 +50,22 @@ def get_songs_by_artist(artist):
                         WHERE [artist] = ?"""
     cursor.execute(sql_find_song, artist)
     
-    # return txt link if the song was found. else return {} 
+    # Define DataFrame according to the SQL query
+    songs_df = pandas.DataFrame(columns=['songID', 'song', 'artist', 'txtlink'])
+
+    # add results of the query to DF
     row = cursor.fetchone()
-    if(row == None):
-        songs = None
-    else:
-        songs = []
+    if(row != None):
         while row is not None:
-            songs.append ({'song': row.song, 'artist': row.artist, 'txtlink':row.txtlink})
+            songs_df.loc[len(songs_df)] = [row.songID,
+                                            row.song,
+                                            row.artist,
+                                            row.txtlink]
             row = cursor.fetchone()
 
     cursor.close()
     connection.close()
-    return songs
+    return songs_df
 
 
 def get_songs_by_word(word):
@@ -94,27 +104,30 @@ def get_songs_by_word(word):
 
 
 def get_full_words_table():
-    # return list of all words from DB
+    # return DF of all words from DB
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
 
-    #find songs by given word
-    sql_words_table =  """SELECT [word]
+    # get full words table
+    sql_words_table =  """SELECT [wordID], [word], [length]
                                FROM [FinalProject].[dbo].[words]"""
 
     cursor.execute(sql_words_table)
     
-    words = []
-
+    # define DF according to the SQL query
+    words_df = pandas.DataFrame(columns=["wordID", "word", "length"])
+    
+    # add all results from query to the DF
     row = cursor.fetchone()
     if(row != None):
         while row is not None:
-            words.append (row.word)
+            words_df.loc[len(words_df)] = [row.wordID, row.word, row.length]
             row = cursor.fetchone()
+
 
     cursor.close()
     connection.close()
-    return words
+    return words_df
 
 
 def get_full_wordIndex_table():
@@ -156,4 +169,4 @@ def get_full_wordIndex_table():
 
 
 
-print(get_songs_by_word("if"))
+print(get_full_words_table())
