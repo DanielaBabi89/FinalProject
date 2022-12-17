@@ -1,13 +1,15 @@
 import pyodbc
 import pandas
 
+# this file contain function for each table in DB. 
+# each function get the rellavent fields as a parameters.
+
 #----------------------------insert_to_songs----------------------------#
 def insert_to_songs(songID, song, artist, txtlink):
     # Exception Handling
     try:
-        # Trusted Connection to Named Instance 
+        # connect to DB
         connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
-
         cursor=connection.cursor()
 
         sql_insert_to_songs = """BEGIN
@@ -20,7 +22,7 @@ def insert_to_songs(songID, song, artist, txtlink):
                                     END
                                 END"""
 
-        # insert to table SONGS
+        # insert to table - SONGS
         cursor.execute(sql_insert_to_songs, song, artist, songID, song, artist, txtlink)
         connection.commit()
 
@@ -36,13 +38,12 @@ def insert_to_songs(songID, song, artist, txtlink):
         exit()
 #----------------------------insert_to_songs----------------------------#
 
-# TODO: convet to multiple add - from dataframe
 #----------------------------insert_to_words----------------------------#
 def insert_to_words(wordID, word, length):
 
     # Exception Handling
     try:
-        # Trusted Connection to Named Instance 
+        # connect to DB
         connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
 
         cursor=connection.cursor()
@@ -56,7 +57,7 @@ def insert_to_words(wordID, word, length):
                                     END
                                 END"""
 
-        # insert to table SONGS
+        # insert to table WORDS
         cursor.execute(sql_insert_to_words, word, word, wordID, length)
         connection.commit()
 
@@ -72,13 +73,12 @@ def insert_to_words(wordID, word, length):
         exit()
 #----------------------------insert_to_words----------------------------#
 
-# TODO: convet to multiple add - from dataframe
 #--------------------------insert_to_wordIndex--------------------------#
 def insert_to_wordIndex(wordID,songID,paragraph,line,index):
 
     # Exception Handling
     try:
-        # Trusted Connection to Named Instance 
+        # connect to DB
         connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
 
         cursor=connection.cursor()

@@ -4,7 +4,8 @@ import numpy
 import pyodbc
 from InsertToDBTables import *
 
-# TODO: Parse txt to WordIndex table
+# This file parse txt file to 3 tables.
+# after parsing, it adds the table to DB (call to InsertToDBTables file)
 
 def txt_to_table (src, dst, fileName, last_songID, last_wordID):
     #-----create song DF--------
@@ -136,7 +137,6 @@ def load_song_to_DB(src, dst, fileName):
     #insert song to wordIndex
     for index, row in wordIndex_table.iterrows():
         insert_to_wordIndex(int(row['wordID']), int(row['songID']), int(row['paragraph']), int(row['line']), int(row['index']))
-
 
 
 src = "C:\\Users\\babid\\Desktop\\FinalProject\\songsTXT\\Witness - Ketty Perry.txt"
