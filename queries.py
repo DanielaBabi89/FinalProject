@@ -57,3 +57,36 @@ def get_songs_by_artist(artist):
     return songs
 
 
+def get_songs_by_word(word):
+    # get some words
+    # return list of songs contain this word from DB if exist, else return None
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    #find songs by given word
+    sql_find_song =     """SELECT DISTINCT songs.[songID]
+                                                ,[song]
+                                                ,[artist]
+                                                ,[txtlink]
+                            FROM [FinalProject].[dbo].[songs], [FinalProject].[dbo].[wordIndex],
+                                    [FinalProject].[dbo].[words]
+                            where wordIndex.wordID = words.wordID and wordIndex.songID = songs.songID
+                                    and words.word = ? """
+    cursor.execute(sql_find_song, word)
+    
+    # return txt link if the song was found. else return {} 
+    row = cursor.fetchone()
+    if(row == None):
+        songs = None
+    else:
+        songs = []
+        while row is not None:
+            songs.append ({'song': row.song, 'artist': row.artist, 'txtlink':row.txtlink})
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return songs
+
+
+print(get_songs_by_word("would"))
