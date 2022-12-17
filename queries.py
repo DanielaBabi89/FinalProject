@@ -167,6 +167,45 @@ def get_full_wordIndex_table():
     return wordsIndex_df
 
 
+def get_word_by_Index(paragraph, line):
+     # return DataFrame of all words from DB with the speciefic index
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    # get word indexes from DB by given paragraph and line
+    sql_wordIndex_table =  """SELECT words.[word]
+                            ,songs.song
+                            ,[paragraph]
+                            ,[line]
+                            ,[indexNum]
+                        FROM [FinalProject].[dbo].[wordIndex],
+                                [FinalProject].[dbo].[words],
+                                [FinalProject].[dbo].[songs] 
+                        WHERE words.wordID = wordIndex.wordID and
+                                songs.songID = wordIndex.songID and
+                                wordIndex.paragraph = ? and
+                                wordIndex.line = ?"""
+    cursor.execute(sql_wordIndex_table,paragraph, line)
+    
+    # define DF according to the SQL query
+    wordsIndex_df = pandas.DataFrame(columns=["word", "song", "paragraph", "line", "indexNum"])
+    
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        while row is not None:
+            wordsIndex_df.loc[len(wordsIndex_df)] = [row.word,
+                                                    row.song,
+                                                    row.paragraph,
+                                                    row.line,
+                                                    row.indexNum]
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return wordsIndex_df
+    
 
 
-print(get_full_words_table())
+
+print(get_word_by_Index(2,2))
