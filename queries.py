@@ -95,11 +95,11 @@ def get_full_words_table():
     cursor = connection.cursor()
 
     #find songs by given word
-    sql_words_table =     """SELECT [word]
-                            FROM [FinalProject].[dbo].[words]"""
+    sql_words_table =  """SELECT [word]
+                               FROM [FinalProject].[dbo].[words]"""
+
     cursor.execute(sql_words_table)
     
-    # return txt link if the song was found. else return None 
     row = cursor.fetchone()
     if(row == None):
         words = None
@@ -113,4 +113,43 @@ def get_full_words_table():
     connection.close()
     return words
 
-print(get_full_words_table())
+
+def get_full_wordIndex_table():
+     # return list of all words from DB with the speciefic index
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    #find songs by given word
+    sql_wordIndex_table =  """SELECT words.[word]
+                            ,songs.song
+                            ,[paragraph]
+                            ,[line]
+                            ,[indexNum]
+                        FROM [FinalProject].[dbo].[wordIndex],
+                                [FinalProject].[dbo].[words],
+                                [FinalProject].[dbo].[songs] 
+                        WHERE words.wordID = wordIndex.wordID and
+                                songs.songID = wordIndex.songID"""
+    cursor.execute(sql_wordIndex_table)
+    
+    row = cursor.fetchone()
+    if(row == None):
+        wordsIndex = None
+    else:
+        wordsIndex = []
+        while row is not None:
+            wordsIndex.append ({'word': row.word,
+                                 'song':row.song, 
+                                 'paragraph': row.paragraph, 
+                                 'line': row.indexNum
+                                 })
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return wordsIndex
+
+
+
+
+print(get_full_wordIndex_table())
