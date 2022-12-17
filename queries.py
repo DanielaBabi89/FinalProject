@@ -1,4 +1,5 @@
 import pyodbc
+import pandas
 
 def get_song_by_name(song_name):
     # get song name
@@ -74,19 +75,22 @@ def get_songs_by_word(word):
                                     and words.word = ? """
     cursor.execute(sql_find_song, word)
     
-    # return txt link if the song was found. else return None 
+    # Define DataFrame according to the SQL query
+    songs_df = pandas.DataFrame(columns=["songID", "sond", "artist", "txtlink"])
+
+    # inset query results to DF
     row = cursor.fetchone()
-    if(row == None):
-        songs = None
-    else:
-        songs = []
+    if(row != None):
         while row is not None:
-            songs.append ({'song': row.song, 'artist': row.artist, 'txtlink':row.txtlink})
+            songs_df.loc[len(songs_df)] = [row.songID,
+                                            row.song, 
+                                            row.artist,
+                                            row.txtlink]
             row = cursor.fetchone()
 
     cursor.close()
     connection.close()
-    return songs
+    return songs_df
 
 
 def get_full_words_table():
@@ -100,11 +104,10 @@ def get_full_words_table():
 
     cursor.execute(sql_words_table)
     
+    words = []
+
     row = cursor.fetchone()
-    if(row == None):
-        words = None
-    else:
-        words = []
+    if(row != None):
         while row is not None:
             words.append (row.word)
             row = cursor.fetchone()
@@ -115,11 +118,11 @@ def get_full_words_table():
 
 
 def get_full_wordIndex_table():
-     # return list of all words from DB with the speciefic index
+     # return DataFrame of all words from DB with the speciefic index
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
 
-    #find songs by given word
+    # get all word indexes from DB
     sql_wordIndex_table =  """SELECT words.[word]
                             ,songs.song
                             ,[paragraph]
@@ -132,24 +135,25 @@ def get_full_wordIndex_table():
                                 songs.songID = wordIndex.songID"""
     cursor.execute(sql_wordIndex_table)
     
+    # define DF according to the SQL query
+    wordsIndex_df = pandas.DataFrame(columns=["word", "song", "paragraph", "line", "indexNum"])
+    
+    # add all results from query to the DF
     row = cursor.fetchone()
-    if(row == None):
-        wordsIndex = None
-    else:
-        wordsIndex = []
+    if(row != None):
         while row is not None:
-            wordsIndex.append ({'word': row.word,
-                                 'song':row.song, 
-                                 'paragraph': row.paragraph, 
-                                 'line': row.indexNum
-                                 })
+            wordsIndex_df.loc[len(wordsIndex_df)] = [row.word,
+                                                    row.song,
+                                                    row.paragraph,
+                                                    row.line,
+                                                    row.indexNum]
             row = cursor.fetchone()
 
     cursor.close()
     connection.close()
-    return wordsIndex
+    return wordsIndex_df
 
 
 
 
-print(get_full_wordIndex_table())
+print(get_songs_by_word("if"))
