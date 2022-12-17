@@ -74,7 +74,7 @@ def get_songs_by_word(word):
                                     and words.word = ? """
     cursor.execute(sql_find_song, word)
     
-    # return txt link if the song was found. else return {} 
+    # return txt link if the song was found. else return None 
     row = cursor.fetchone()
     if(row == None):
         songs = None
@@ -89,4 +89,28 @@ def get_songs_by_word(word):
     return songs
 
 
-print(get_songs_by_word("would"))
+def get_full_words_table():
+    # return list of all words from DB
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    #find songs by given word
+    sql_words_table =     """SELECT [word]
+                            FROM [FinalProject].[dbo].[words]"""
+    cursor.execute(sql_words_table)
+    
+    # return txt link if the song was found. else return None 
+    row = cursor.fetchone()
+    if(row == None):
+        words = None
+    else:
+        words = []
+        while row is not None:
+            words.append (row.word)
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return words
+
+print(get_full_words_table())
