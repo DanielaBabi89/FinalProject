@@ -61,5 +61,4 @@ def get_first_wordNum_in_line(line):
     connection.close()
     return first_lines_df
 
-
-print(get_first_lineNum_in_paragraph(2))
+# USE ME: int(get_first_lineNum_in_paragraph(2)["firstLine"][0])

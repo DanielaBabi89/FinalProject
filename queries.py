@@ -1,5 +1,7 @@
 import pyodbc
 import pandas
+from auxiliaryQueries import *
+
 
 def get_song_by_name(song_name):
     # get song name
@@ -207,7 +209,7 @@ def get_word_by_Index(paragraph, line):
     
 
 def get_words_in_next_prev_lines(word):
-    # return DataFrame of all words from DB with the speciefic index
+    # return DataFrame of all words from DB the located in the prev, cur, and next line of a given word
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
 
@@ -269,6 +271,13 @@ def get_words_by_index(paragraph, line):
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
 
+    # the lines in the DB is the line number in the whole song.
+    # therefor we need to calculate the actual number the the user asked for.
+    # for example: line number 2 in paragraph 2 --> is line number 7 in the DB.
+    real_line = int(get_first_lineNum_in_paragraph(paragraph)["firstLine"][0]) + line - 1
+
+    print(real_line)
+
     sql_query = """SELECT word
                         ,song
                         ,artist
@@ -280,7 +289,7 @@ def get_words_by_index(paragraph, line):
                     FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words], [FinalProject].[dbo].[songs]
                     WHERE [songs].songID = [wordIndex].songID and [words].wordID = [wordIndex].wordID and [paragraph] = ? and [line] = ?"""
 
-    cursor.execute(sql_query,paragraph, line)
+    cursor.execute(sql_query,paragraph, real_line)
 
     # define DF according to the SQL query
     words_in_index_df = pandas.DataFrame(columns=["word",
