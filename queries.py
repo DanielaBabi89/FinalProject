@@ -206,6 +206,61 @@ def get_word_by_Index(paragraph, line):
     return wordsIndex_df
     
 
+def get_words_in_next_prev_lines(word):
+    # return DataFrame of all words from DB with the speciefic index
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
 
+    sql_query = """select word
+                        ,wordIndex.[wordID]
+                        ,[song]
+                        ,wordIndex.[songID]
+                        ,[paragraph]
+                        ,[line]
+                        ,[indexNum]
+                    from [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words], [FinalProject].[dbo].[songs]
+                    where [words].wordID = [wordIndex].wordID and 
+                            [songs].songID = [wordIndex].songID and
+                            wordIndex.line in (select line - 1 
+                                                FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
+                                                WHERE [words].wordID = [wordIndex].wordID and
+                                                        [words].word = ?
 
-print(get_word_by_Index(2,2))
+                                                union
+
+                                                select line 
+                                                FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
+                                                WHERE [words].wordID = [wordIndex].wordID and
+                                                        [words].word = ?
+
+                                                union 
+
+                                                select line + 1
+                                                FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
+                                                WHERE [words].wordID = [wordIndex].wordID and
+                                                        [words].word = ?)
+                    order by [indexNum] """
+
+    cursor.execute(sql_query,word, word, word)
+
+    # define DF according to the SQL query
+    wordsIndex_inRange_df = pandas.DataFrame(columns=["word", "wordID", "song", "songID", "paragraph", "line", "indexNum"])
+    
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        while row is not None:
+            wordsIndex_inRange_df.loc[len(wordsIndex_inRange_df)] = [row.word,
+                                                     row.wordID,
+                                                     row.song,
+                                                     row.songID,
+                                                     row.paragraph,
+                                                     row.line,
+                                                     row.indexNum]
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return wordsIndex_inRange_df
+
+print(get_words_in_next_prev_lines("if"))
