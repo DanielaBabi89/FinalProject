@@ -263,4 +263,54 @@ def get_words_in_next_prev_lines(word):
     connection.close()
     return wordsIndex_inRange_df
 
-print(get_words_in_next_prev_lines("if"))
+
+def get_words_by_index(paragraph, line):
+     # return DataFrame of all words from DB with the speciefic index
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    sql_query = """SELECT word
+                        ,song
+                        ,artist
+                        ,words.[wordID]
+                        ,songs.[songID]
+                        ,[paragraph]
+                        ,[line]
+                        ,[indexNum]
+                    FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words], [FinalProject].[dbo].[songs]
+                    WHERE [songs].songID = [wordIndex].songID and [words].wordID = [wordIndex].wordID and [paragraph] = ? and [line] = ?"""
+
+    cursor.execute(sql_query,paragraph, line)
+
+    # define DF according to the SQL query
+    words_in_index_df = pandas.DataFrame(columns=["word",
+                                                 "song",
+                                                 "artist", 
+                                                 "wordID", 
+                                                 "songID", 
+                                                 "paragraph", 
+                                                 "line", 
+                                                 "indexNum"])
+    
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        while row is not None:
+            words_in_index_df.loc[len(words_in_index_df)] = [row.word,
+                                                 row.song,
+                                                 row.artist, 
+                                                 row.wordID, 
+                                                 row.songID, 
+                                                 row.paragraph, 
+                                                 row.line, 
+                                                 row.indexNum]
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return words_in_index_df
+    
+
+
+
+print(get_words_by_index(1,3))
