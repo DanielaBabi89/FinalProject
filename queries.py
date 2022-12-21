@@ -2,6 +2,8 @@ import pyodbc
 import pandas
 from auxiliaryQueries import *
 
+# TODO: Add try & except
+
 
 def get_song_by_name(song_name):
     # get song name

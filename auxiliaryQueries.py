@@ -1,6 +1,9 @@
 import pyodbc
 import pandas
 
+# TODO: Add try & except
+
+
 def get_first_lineNum_in_paragraph(paragraph):
     # get paragraph number
     # return the first line number in this paragraph **in each song**
@@ -60,5 +63,71 @@ def get_first_wordNum_in_line(line):
     cursor.close()
     connection.close()
     return first_lines_df
+
+
+def get_last_id_from_phrase_table ():
+    # return the last phraseID in phrase table
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    #find last wordID to continue from it
+    sql_max_wordID= """select phraseID as max
+                        from phrase
+                        where phraseID = (select MAX(phraseID) from phrase)"""
+    cursor.execute(sql_max_wordID)
+    
+    last_phraseID = cursor.fetchone()
+    
+    cursor.close()
+    connection.close()
+
+    if (last_phraseID == None): # first row
+        return 0
+    else:
+        return last_phraseID.max
+
+
+def get_last_id_from_word_table ():
+    #return the last ID that in the DB tables: words and songs
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    #find last wordID to continue from it
+    sql_max_wordID= """select wordID as max
+                        from words
+                        where wordID = (select MAX(wordID) from words)"""
+    cursor.execute(sql_max_wordID)
+    last_wordID = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    if (last_wordID == None): # first row
+        return 0
+    else:
+        return last_wordID.max
+
+
+def get_wordID (word):
+    #return the last ID that in the DB tables: words and songs
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    #find last wordID to continue from it
+    sql_max_wordID= """select wordID
+                        from words
+                        where word = ?"""
+
+    cursor.execute(sql_max_wordID, word)
+    wordID = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    if (wordID == None): # first row
+        return -1
+    else:
+        return wordID.wordID
+
 
 # USE ME: int(get_first_lineNum_in_paragraph(2)["firstLine"][0])
