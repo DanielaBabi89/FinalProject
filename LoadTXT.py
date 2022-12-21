@@ -103,14 +103,22 @@ def get_last_id_from_DB ():
                         from words
                         where wordID = (select MAX(wordID) from words)"""
     cursor.execute(sql_max_wordID)
-    last_wordID = cursor.fetchone().max
+    last_wordID = cursor.fetchone()
+    if (last_wordID == None):
+        last_wordID = 0 
+    else:
+        last_wordID = last_wordID.max
 
     #find last songID to continue from it
     sql_max_wordID= """select songID as max
                         from songs
                         where songID = (select MAX(songID) from songs)"""
     cursor.execute(sql_max_wordID)
-    last_songID = cursor.fetchone().max
+    last_songID = cursor.fetchone()
+    if (last_songID == None):
+            last_songID = 0 
+    else:
+        last_songID = last_songID.max
 
     cursor.close()
     connection.close()

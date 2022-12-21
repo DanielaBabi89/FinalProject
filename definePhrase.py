@@ -45,4 +45,4 @@ def define_phrase(phraseName, phrase):
         exit()
 
 
-#print(define_phrase("first line", "If i lost"))
+# print(define_phrase("first line", "If i lost"))
