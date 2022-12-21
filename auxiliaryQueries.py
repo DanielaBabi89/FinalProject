@@ -130,4 +130,26 @@ def get_wordID (word):
         return wordID.wordID
 
 
+def get_last_id_from_group_table():
+    # return the last groupID in group table
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    #find last groupID to continue from it
+    sql_max_groupID= """select groupID as max
+                        from [FinalProject].[dbo].[group]
+                        where groupID = (select MAX(groupID) from [FinalProject].[dbo].[group])"""
+    cursor.execute(sql_max_groupID)
+    
+    last_groupID = cursor.fetchone()
+    
+    cursor.close()
+    connection.close()
+
+    if (last_groupID == None): # first row
+        return 0
+    else:
+        return last_groupID.max
+
+
 # USE ME: int(get_first_lineNum_in_paragraph(2)["firstLine"][0])

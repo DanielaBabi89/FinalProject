@@ -184,3 +184,75 @@ def insert_to_phraseDetails(phraseID, wordID, wordIndex):
         print()
         exit()
 #------------------------insert_to_phraseDetails------------------------#
+
+#----------------------------insert_to_group----------------------------#
+def insert_to_group(groupID, groupName):
+
+    # Exception Handling
+    try:
+        # connect to DB
+        connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+        cursor=connection.cursor()
+
+        # Add one line to phrase table
+        groupID = get_last_id_from_group_table() + 1
+
+        sql_insert_to_group = """BEGIN
+                                    IF NOT EXISTS (SELECT * FROM [FinalProject].[dbo].[group] 
+                                                    WHERE groupID = ?
+                                                    and groupName = ?)
+                                    BEGIN
+                                        INSERT INTO [FinalProject].[dbo].[group] (groupID, groupName)
+                                        VALUES (?, ?)
+                                    END
+                                END"""
+
+        cursor.execute(sql_insert_to_group, groupID, groupName, groupID, groupName)
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+    except pyodbc.Error as ex:
+        print("Exception: ",ex)
+        cursor.close()
+        connection.close()
+        print("Closing program...")
+        print()
+        exit()
+#----------------------------insert_to_group---------------------------#
+
+#------------------------insert_to_groupDetails------------------------#
+def insert_to_groupDetails(groupID, wordID):
+
+    # Exception Handling
+    try:
+        # connect to DB
+        connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+        cursor=connection.cursor()
+
+        # Add one line to groupDetails table
+        sql_insert_groupDetails = """BEGIN
+                                    IF NOT EXISTS (SELECT * FROM [FinalProject].[dbo].[groupDetails] 
+                                                    WHERE groupID = ?
+                                                    and wordID = ?)
+                                    BEGIN
+                                        INSERT INTO [FinalProject].[dbo].[groupDetails] (groupID, wordID)
+                                        VALUES (?, ?)
+                                    END
+                                END"""
+
+        cursor.execute(sql_insert_groupDetails, groupID, wordID, groupID, wordID)
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+    except pyodbc.Error as ex:
+        print("Exception: ",ex)
+        cursor.close()
+        connection.close()
+        print("Closing program...")
+        print()
+        exit()
+#------------------------insert_to_groupDetails------------------------#

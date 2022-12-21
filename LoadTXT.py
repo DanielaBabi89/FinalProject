@@ -71,6 +71,7 @@ def txt_to_table (src, dst, fileName, last_songID, last_wordID):
 
     return songs_table, words_table, wordIndex_table
 
+
 def get_word_id(word):
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
@@ -92,6 +93,7 @@ def get_word_id(word):
     connection.close()
 
     return id
+
 
 def get_last_id_from_DB ():
     #return the last ID that in the DB tables: words and songs
@@ -124,6 +126,7 @@ def get_last_id_from_DB ():
     connection.close()
 
     return last_songID, last_wordID
+
 
 def load_song_to_DB(src, dst, fileName):
     # input: source and destination path, and the name of the file
