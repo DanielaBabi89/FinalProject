@@ -4,7 +4,7 @@ from auxiliaryQueries import *
 
 # TODO: Add try & except
 
-
+#----------------------------get_song_by_name----------------------------#
 def get_song_by_name(song_name):
     # get song name
     # return the rellavent row from DB if exist (as dictionary), else return None
@@ -37,8 +37,9 @@ def get_song_by_name(song_name):
     cursor.close()
     connection.close()
     return songs_df
+#----------------------------get_song_by_name----------------------------#
 
-
+#---------------------------get_songs_by_artist--------------------------#
 def get_songs_by_artist(artist):
     # get artist name
     # return DF with the rellavent rows from DB
@@ -70,8 +71,9 @@ def get_songs_by_artist(artist):
     cursor.close()
     connection.close()
     return songs_df
+#---------------------------get_songs_by_artist--------------------------#
 
-
+#---------------------------get_songs_by_word----------------------------#
 def get_songs_by_word(word):
     # get some words
     # return list of songs contain this word from DB if exist, else return None
@@ -105,8 +107,9 @@ def get_songs_by_word(word):
     cursor.close()
     connection.close()
     return songs_df
+#---------------------------get_songs_by_word----------------------------#
 
-
+#-------------------------get_full_words_table---------------------------#
 def get_full_words_table():
     # return DF of all words from DB
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
@@ -132,8 +135,9 @@ def get_full_words_table():
     cursor.close()
     connection.close()
     return words_df
+#-------------------------get_full_words_table---------------------------#
 
-
+#-----------------------get_full_wordIndex_table-------------------------#
 def get_full_wordIndex_table():
      # return DataFrame of all words from DB with the speciefic index
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
@@ -169,8 +173,9 @@ def get_full_wordIndex_table():
     cursor.close()
     connection.close()
     return wordsIndex_df
+#-----------------------get_full_wordIndex_table-------------------------#
 
-
+#---------------------------get_word_by_Index----------------------------#
 def get_word_by_Index(paragraph, line):
      # return DataFrame of all words from DB with the speciefic index
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
@@ -208,8 +213,9 @@ def get_word_by_Index(paragraph, line):
     cursor.close()
     connection.close()
     return wordsIndex_df
-    
+#---------------------------get_word_by_Index----------------------------#
 
+#----------------------get_words_in_next_prev_lines----------------------#
 def get_words_in_next_prev_lines(word):
     # return DataFrame of all words from DB the located in the prev, cur, and next line of a given word
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
@@ -266,8 +272,9 @@ def get_words_in_next_prev_lines(word):
     cursor.close()
     connection.close()
     return wordsIndex_inRange_df
+#----------------------get_words_in_next_prev_lines----------------------#
 
-
+#-----------------------------get_words_by_index-------------------------#
 def get_words_by_index(paragraph, line):
      # return DataFrame of all words from DB with the speciefic index
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
@@ -320,8 +327,103 @@ def get_words_by_index(paragraph, line):
     cursor.close()
     connection.close()
     return words_in_index_df
+#-----------------------------get_words_by_index-------------------------#
+
+#------------------------------get_index_of_word-------------------------#
+def get_index_of_word(word):
+     # return DataFrame of all indexes of given word
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    sql_query = """SELECT [wordIndex].[wordID]
+                        ,[songID]
+                        ,[paragraph]
+                        ,[line]
+                        ,[indexNum]
+                    FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
+                    WHERE [wordIndex].[wordID] = [words].[wordID]
+                            and word = ?"""
+
+    cursor.execute(sql_query,word)
+
+    # define DF according to the SQL query
+    indexes_of_word_df = pandas.DataFrame(columns=["wordID",
+                                                 "songID", 
+                                                 "paragraph", 
+                                                 "line", 
+                                                 "indexNum"])
+    
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        while row is not None:
+            indexes_of_word_df.loc[len(indexes_of_word_df)] = [
+                                                 row.wordID, 
+                                                 row.songID, 
+                                                 row.paragraph, 
+                                                 row.line, 
+                                                 row.indexNum]
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return indexes_of_word_df
+#------------------------------get_index_of_word-------------------------#
+
+#------------------------------get_index_of_word-------------------------#
+def get_index_of_group(groupName):
+ # return DataFrame of all indexes of given group name
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    sql_query = """ SELECT  [groupDetails].[groupID]
+                        ,[groupName]
+                        ,[groupDetails].[wordID]
+                        ,[songID]
+                        ,[paragraph]
+                        ,[line]
+                        ,[indexNum]
+                    FROM [FinalProject].[dbo].[wordIndex]
+                        , [FinalProject].[dbo].[group], [FinalProject].[dbo].[groupDetails]
+                    WHERE [group].[groupID] = [groupDetails].[groupID]
+                        and [wordIndex].[wordID] = [groupDetails].[wordID]
+                        and [groupName] = ?"""
+
+    cursor.execute(sql_query, groupName)
+
+    # define DF according to the SQL query
+    indexes_of_group_df = pandas.DataFrame(columns=["groupID"
+                                                ,"groupName"
+                                                ,"wordID"
+                                                ,"songID" 
+                                                ,"paragraph" 
+                                                ,"line"
+                                                ,"indexNum"])
+    
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        while row is not None:
+            indexes_of_group_df.loc[len(indexes_of_group_df)] = [
+                                                 row.groupID,
+                                                 row.groupName,
+                                                 row.wordID, 
+                                                 row.songID, 
+                                                 row.paragraph, 
+                                                 row.line, 
+                                                 row.indexNum]
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return indexes_of_group_df
+#------------------------------get_index_of_word-------------------------#
+
+#----------------------------------df_to_csv-----------------------------#
+def df_to_csv(df, file_name, dst_path):
+    df.to_csv(dst_path + "\"" + file_name + ".csv",)
+#----------------------------------df_to_csv-----------------------------#
     
 
 
-
-print(get_words_by_index(1,3))
+print(get_index_of_group("first group"))
