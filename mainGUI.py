@@ -145,9 +145,23 @@ def search_group_result(group):
     else:
         show_result_table(df)
 
+def search_group_by_word_result(word):
+    df = get_group_by_word(word)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
+
 #-------------------phrase - SEARCH BUTTONS-------------------#
 def search_phrase_result(phrase):
     df = get_speciefic_phrase(phrase)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
+
+def search_phrase_by_word_result(word):
+    df = get_phrase_by_word(word)
     if(len(df)==0):
         no_result_found()
     else:
@@ -254,12 +268,22 @@ def show_groups_search():
         widget.destroy()
 
     # Create the entries and button, and add them to the second container
-    label = tk.Label(search_frame, text='Group Name')
+    label = tk.Label(search_frame, text='Group Name', font=FONT2)
     label.pack()  
     group_name_entry = tk.Entry(search_frame)
     group_name_entry.pack()
     search_index_by_group_button = tk.Button(search_frame, text='search',
                                     command=lambda: search_group_result(group_name_entry.get()))
+    search_index_by_group_button.pack()
+
+    label = tk.Label(search_frame, text='Group by word', font=FONT2)
+    label.pack()  
+    label = tk.Label(search_frame, text='word')
+    label.pack()  
+    word_entry4 = tk.Entry(search_frame)
+    word_entry4.pack()
+    search_index_by_group_button = tk.Button(search_frame, text='search',
+                                    command=lambda: search_group_by_word_result(word_entry4.get()))
     search_index_by_group_button.pack()
 
 def show_phrases_search():
@@ -275,6 +299,17 @@ def show_phrases_search():
     search_index_by_group_button = tk.Button(search_frame, text='search',
                                     command=lambda: search_phrase_result(phrase_name_entry.get()))
     search_index_by_group_button.pack()
+
+    label = tk.Label(search_frame, text='Phrase by word', font=FONT2)
+    label.pack()  
+    label = tk.Label(search_frame, text='word')
+    label.pack()  
+    word_entry5 = tk.Entry(search_frame)
+    word_entry5.pack()
+    search_index_by_group_button = tk.Button(search_frame, text='search',
+                                    command=lambda: search_phrase_by_word_result(word_entry5.get()))
+    search_index_by_group_button.pack()
+
 
 #-------------------DEFAULT BUTTONS SHOW-------------------#
 def songs_button_default():
@@ -318,7 +353,7 @@ def phrases_button_default():
     for widget in result_frame.winfo_children():
         widget.destroy()
 
-    show_groups_search()
+    show_phrases_search()
     df = get_full_phrase_table()
     show_result_table(df)
 
