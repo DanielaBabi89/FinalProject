@@ -203,6 +203,77 @@ def get_full_groupDetails_table():
     return groups_df
 #-------------------------get_full_songs_table---------------------------#
 
+#-------------------------get_full_phrase_table---------------------------#
+def get_full_phrase_table():
+    # return DF of all words from DB
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    # get full words table
+    sql_phrases_table =  """SELECT [phraseName]
+                                ,[word]
+                                ,[wordIndex]
+                            FROM [FinalProject].[dbo].[phraseDetails], 
+                                [FinalProject].[dbo].[phrase],
+                                [FinalProject].[dbo].[words]
+                            WHERE [phraseDetails].wordID = [words].wordID 
+                                    and [phraseDetails].phraseID = [phrase].phraseID"""
+
+    cursor.execute(sql_phrases_table)
+    
+    # define DF according to the SQL query
+    phrases_df = pandas.DataFrame(columns=["Phrase", 
+                                        "Word",
+                                        "Word Index"])
+    
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        while row is not None:
+            phrases_df.loc[len(phrases_df)] = [row.phraseName, row.word, row.wordIndex]
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return phrases_df
+#-------------------------get_full_phrase_table---------------------------#
+
+#---------------------------get_phrase_by_name----------------------------#
+def get_speciefic_phrase(phrase):
+    # return DF of all words from DB
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    # get full words table
+    sql_phrases_table =  """SELECT [phraseName]
+                                ,[word]
+                                ,[wordIndex]
+                            FROM [FinalProject].[dbo].[phraseDetails], 
+                                [FinalProject].[dbo].[phrase],
+                                [FinalProject].[dbo].[words]
+                            WHERE [phraseDetails].wordID = [words].wordID 
+                                    and [phraseDetails].phraseID = [phrase].phraseID
+                                    and [phraseDetails].phraseName = ?"""
+
+    cursor.execute(sql_phrases_table, phrase)
+    
+    # define DF according to the SQL query
+    phrases_df = pandas.DataFrame(columns=["Phrase", 
+                                        "Word",
+                                        "Word Index"])
+    
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        while row is not None:
+            phrases_df.loc[len(phrases_df)] = [row.phraseName, row.word, row.wordIndex]
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return phrases_df
+#---------------------------get_phrase_by_name----------------------------#
+
 #-----------------------get_full_wordIndex_table-------------------------#
 def get_full_wordIndex_table():
      # return DataFrame of all words from DB with the speciefic index

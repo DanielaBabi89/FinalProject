@@ -72,7 +72,6 @@ def no_result_found():
                     fg=RED,
                     background=YELLOW)
     label.pack()
-    
 
 #-------------------songs - SEARCH BUTTONS-------------------#
 def search_by_song_button_result(name1):
@@ -141,6 +140,14 @@ def search_index_of_group_result(group):
 #-------------------group - SEARCH BUTTONS-------------------#
 def search_group_result(group):
     df = get_speciefic_group(group)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
+
+#-------------------phrase - SEARCH BUTTONS-------------------#
+def search_phrase_result(phrase):
+    df = get_speciefic_phrase(phrase)
     if(len(df)==0):
         no_result_found()
     else:
@@ -255,6 +262,20 @@ def show_groups_search():
                                     command=lambda: search_group_result(group_name_entry.get()))
     search_index_by_group_button.pack()
 
+def show_phrases_search():
+    # Clear the content frame
+    for widget in search_frame.winfo_children():
+        widget.destroy()
+
+    # Create the entries and button, and add them to the second container
+    label = tk.Label(search_frame, text='Phrase Name')
+    label.pack()  
+    phrase_name_entry = tk.Entry(search_frame)
+    phrase_name_entry.pack()
+    search_index_by_group_button = tk.Button(search_frame, text='search',
+                                    command=lambda: search_phrase_result(phrase_name_entry.get()))
+    search_index_by_group_button.pack()
+
 #-------------------DEFAULT BUTTONS SHOW-------------------#
 def songs_button_default():
     # Clear the content frame
@@ -292,6 +313,14 @@ def groups_button_default():
     df = get_full_groupDetails_table()
     show_result_table(df)
 
+def phrases_button_default():
+    # Clear the content frame
+    for widget in result_frame.winfo_children():
+        widget.destroy()
+
+    show_groups_search()
+    df = get_full_phrase_table()
+    show_result_table(df)
 
 # Create the buttons and add them to the first container
 #lambda: show_songs("Witness")
@@ -303,6 +332,8 @@ indexes_button = tk.Button(menu_frame, text='Indexes', command=indexes_button_de
 indexes_button.pack()
 groups_button = tk.Button(menu_frame, text='Groups', command=groups_button_default)
 groups_button.pack()
+phrases_button = tk.Button(menu_frame, text='Phrases', command=phrases_button_default)
+phrases_button.pack()
 
 # Start the main loop
 window.mainloop()
