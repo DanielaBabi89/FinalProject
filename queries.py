@@ -464,7 +464,7 @@ def get_words_in_next_prev_lines(word):
 
     cursor.close()
     connection.close()
-    return wordsIndex_inRange_df
+    return concatenate__into_str(wordsIndex_inRange_df)
 #----------------------get_words_in_next_prev_lines----------------------#
 
 #-----------------------------get_words_by_index-------------------------#
@@ -712,6 +712,6 @@ def get_index_of_group(groupName):
 def df_to_csv(df, file_name, dst_path):
     df.to_csv(dst_path + "\"" + file_name + ".csv",)
 #----------------------------------df_to_csv-----------------------------#
-    
+
 
 

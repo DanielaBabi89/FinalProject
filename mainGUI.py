@@ -1,6 +1,7 @@
 import tkinter as tk
 import pandas as pd
 from queries import *
+import tkinter.messagebox as messagebox
 
 import tkinter.ttk as ttk
 # Const colors:
@@ -137,6 +138,18 @@ def search_index_of_group_result(group):
     else:
         show_result_table(df)
 
+def search_range_word_result(word):
+    range_string = get_words_in_next_prev_lines(word)
+    range_string = range_string.replace(word, " **" + word + "** ")
+    #messagebox.showinfo(word , range_string)
+    popup = tk.Toplevel()
+    popup.title(word)
+
+    # Add a label to the pop-up window with the string "Hello, world!"
+    label = tk.Label(popup, text=range_string, font=("Arial", 12))
+    label.pack()
+
+
 #-------------------group - SEARCH BUTTONS-------------------#
 def search_group_result(group):
     df = get_speciefic_group(group)
@@ -221,6 +234,16 @@ def show_words_search():
     search_by_length_button = tk.Button(search_frame, text='search',
                                     command=lambda: search_word_by_length_result(length_entry.get()))
     search_by_length_button.pack()  
+
+    label = tk.Label(search_frame, text='Range of Word', font=FONT2, background=PINK)
+    label.pack()
+    label = tk.Label(search_frame, text='Word', background=PINK)
+    label.pack()
+    word_entry6 = tk.Entry(search_frame)
+    word_entry6.pack()
+    search_range_word_button = tk.Button(search_frame, text='search',
+                                    command=lambda: search_range_word_result(word_entry6.get()))
+    search_range_word_button.pack() 
 
 def show_indexes_search():
     # Clear the content frame

@@ -152,4 +152,25 @@ def get_last_id_from_group_table():
         return last_groupID.max
 
 
+def concatenate__into_str(df):
+    str = ''
+
+    prev = 0
+    current = 0
+    start = True
+    for index, row in df.iterrows():
+        if(start):
+            prev = row.line
+            start = False
+            str += row.word + " "
+            pass
+        else: 
+            current = row.line
+            if (current - 1 == prev):
+                str += "\n"
+            if (current - 1 > prev):
+                str += "\n\n"
+            str += row.word + " "
+        prev = row.line
+    return str
 # USE ME: int(get_first_lineNum_in_paragraph(2)["firstLine"][0])
