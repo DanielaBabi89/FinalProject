@@ -1,48 +1,48 @@
 import tkinter as tk
+from tkinter import ttk
+import pandas as pd
 
-# Create the main window
+# Create a sample DataFrame
+df = pd.DataFrame({'name': ['Alice', 'Bob', 'Charlie', 'Dave'],
+                   'age': [25, 30, 35, 40],
+                   'selected': [True, False, False, True]})
+
+# Create the Tkinter window and frame
 window = tk.Tk()
-screen_width = window.winfo_screenwidth()
-screen_height = window.winfo_screenheight()
-# Create a frame to hold the buttons and another frame to hold the content
-menu_frame = tk.Frame(window)
-result_frame = tk.Frame(window)
+frame = tk.Frame(window)
+frame.pack()
 
-menu_frame.pack()
-result_frame.pack()
+# Create the Treeview widget
+tree = ttk.Treeview(frame, columns=('name', 'age', 'selected'), show='headings')
 
-# Create a function to be called when the "Page 1" button is pressed
-def show_page_1():
-    # Clear the content frame
-    for widget in result_frame.winfo_children():
-        widget.destroy()
-    # Create a label and place it in the content frame
-    label = tk.Label(result_frame, text="This is page 1")
-    label.pack()
+# Set the column headings
+tree.heading('name', text='Name')
+tree.heading('age', text='Age')
+tree.heading('selected', text='Selected')
 
-# Create a function to be called when the "Page 2" button is pressed
-def show_page_2():
-    # Clear the content frame
-    for widget in result_frame.winfo_children():
-        widget.destroy()
-        
-    # Create a label and place it in the content frame
-        label = tk.Label(result_frame, text='Song name')
-        label.pack()
-        
-        song_name_entry = tk.Entry(result_frame)
-        song_name_entry.pack()
+# Add the checkbox column
+tree['displaycolumns'] = ('selected',)
 
-        search_button = tk.Button(result_frame, text='search')
-        search_button.pack()
+# Add the data to the Treeview widget
+for i, row in df.iterrows():
+    # Create a checkbox widget for the selected column
+    cb = ttk.Checkbutton(tree, variable=row['selected'])
+    tree.insert('', 'end', values=(row['name'], row['age'], cb))
 
-# Create the "Page 1" button and place it in the button frame
-page_1_button = tk.Button(menu_frame, text="Page 1", command=show_page_1)
-page_1_button.pack(side="left")
+# Pack the Treeview widget
+tree.pack(side='left')
 
-# Create the "Page 2" button and place it in the button frame
-page_2_button = tk.Button(menu_frame, text="Page 2", command=show_page_2)
-page_2_button.pack(side="left")
+# Define a function to get the selected rows
+def get_selected_rows():
+    # Get the list of selected rows
+    selected_rows = tree.selection()
 
-# Run the main loop
+    # Print the indexes of the selected rows in the DataFrame
+    print(selected_rows)
+
+# Create a button to get the selected rows
+button = tk.Button(frame, text='Get Selected Rows', command=get_selected_rows)
+button.pack(side='right')
+
+# Run the Tkinter event loop
 window.mainloop()

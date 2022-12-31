@@ -2,8 +2,11 @@ import tkinter as tk
 import pandas as pd
 from queries import *
 import tkinter.messagebox as messagebox
-
+from statisticQueries import *
 import tkinter.ttk as ttk
+from defineGroup import *
+
+
 # Const colors:
 PURPLE = "#ADA2FF"
 BLUE = "#C0DEFF"
@@ -44,10 +47,30 @@ search_frame.pack(side='left', fill=tk.BOTH)
 result_frame = tk.Frame(window, height=screen_height, width=screen_width*(7/10), background=YELLOW)
 result_frame.pack(side='left',fill=tk.BOTH, expand=True)
 
+def create_group_from_db(groupName):
+    selected_rows = treeview.selection()
+    # Get the data of the selected rows
+    data = []
+    for row in selected_rows:
+        item = treeview.item(row)
+        data.append(item['values'][1])
+    define_group(groupName, data)
+    
+    massage = groupName + ": " + str(data)
+    messagebox.showinfo('new group', "new group added: \n"+massage)
+
+def create_group_from_text(groupName, data):
+    print(data)
+    define_group(groupName, data)
+    
+    massage = groupName + ": " + str(data)
+    messagebox.showinfo('new group', "new group added: \n"+massage)
+
 def show_result_table(df):
     # Clear the content frame
     for widget in result_frame.winfo_children():
         widget.destroy()
+    global treeview 
     treeview = ttk.Treeview(result_frame, columns=df.columns, show='headings')
 
     # set the column headings
@@ -180,6 +203,42 @@ def search_phrase_by_word_result(word):
     else:
         show_result_table(df)
 
+#-------------------Statistics - SEARCH BUTTONS-------------------#
+def by_paragraph_statistics(song):
+    df = statistic_words_in_paragraphs(song)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
+
+def by_line_statistics(song):
+    df = statistic_words_in_lines(song)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
+
+def by_word_statistics(song):
+    count = statistic_words_in_song(song)
+    if (count == None):
+        no_result_found()
+    else:
+        popup = tk.Toplevel()
+        popup.title(song)
+
+        massage = str(count) + " words in the song: " + song
+        # Add a label to the pop-up window with the string "Hello, world!"
+        label = tk.Label(popup, text=massage, font=("Arial", 30))
+        label.pack()
+
+def frequency_list_statistics():
+    df = statistic_word_frequency_list()
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
+
+
 #-------------------SEARCH FRAME-------------------#
 def show_songs_search():
     # Clear the content frame
@@ -244,6 +303,30 @@ def show_words_search():
     search_range_word_button = tk.Button(search_frame, text='search',
                                     command=lambda: search_range_word_result(word_entry6.get()))
     search_range_word_button.pack() 
+
+
+    label = tk.Label(search_frame, text='*****', background=PINK)
+    label.pack(pady=15)
+    label = tk.Label(search_frame, text='Select or Type \n words to create\n new group',
+                    font=FONT2, background=PINK)
+    label.pack()
+    label = tk.Label(search_frame, text='Group Name', background=PINK)
+    label.pack()
+    new_group_entry = tk.Entry(search_frame)
+    new_group_entry.pack()
+
+    add_group_button = tk.Button(search_frame, text='create for selection',
+                                    command=lambda: create_group_from_db(new_group_entry.get()))
+    add_group_button.pack() 
+    label = tk.Label(search_frame, text='Words', background=PINK)
+    label.pack(pady=5)
+    text = tk.Text(search_frame, width=15, height=9)
+    text.pack()
+
+    add_group_button1 = tk.Button(search_frame, text='create from text',
+                command=lambda: create_group_from_text(new_group_entry.get(), text.get('1.0', 'end').split('\n')))
+    add_group_button1.pack(pady=5)
+     
 
 def show_indexes_search():
     # Clear the content frame
@@ -333,6 +416,33 @@ def show_phrases_search():
                                     command=lambda: search_phrase_by_word_result(word_entry5.get()))
     search_index_by_group_button.pack()
 
+def show_statistics_search():
+    # Clear the content frame
+    for widget in search_frame.winfo_children():
+        widget.destroy()
+
+    # Create the entries and button, and add them to the second container
+    label = tk.Label(search_frame, text='Song Statistics', font=FONT2)
+    label.pack()  
+    song_entry = tk.Entry(search_frame)
+    song_entry.pack()
+
+    paragraph_stats_button = tk.Button(search_frame, text='By Paragraphs',
+                                    command=lambda: by_paragraph_statistics(song_entry.get()))
+    paragraph_stats_button.pack()
+
+    line_stats_button = tk.Button(search_frame, text='By Lines',
+                                    command=lambda: by_line_statistics(song_entry.get()))
+    line_stats_button.pack()
+
+    song_stats_button = tk.Button(search_frame, text='By Words',
+                                    command=lambda: by_word_statistics(song_entry.get()))
+    song_stats_button.pack()
+
+    frequency_button = tk.Button(search_frame, text='Full Frequency List', background=PURPLE,
+                                    command=frequency_list_statistics)
+    frequency_button.pack(pady=50)
+
 
 #-------------------DEFAULT BUTTONS SHOW-------------------#
 def songs_button_default():
@@ -380,6 +490,13 @@ def phrases_button_default():
     df = get_full_phrase_table()
     show_result_table(df)
 
+def statistics_button_default():
+    # Clear the content frame
+    for widget in result_frame.winfo_children():
+        widget.destroy()
+
+    show_statistics_search()
+
 # Create the buttons and add them to the first container
 #lambda: show_songs("Witness")
 songs_button = tk.Button(menu_frame, text='Songs', command=songs_button_default)
@@ -391,6 +508,10 @@ indexes_button.pack()
 groups_button = tk.Button(menu_frame, text='Groups', command=groups_button_default)
 groups_button.pack()
 phrases_button = tk.Button(menu_frame, text='Phrases', command=phrases_button_default)
+phrases_button.pack()
+
+phrases_button = tk.Button(menu_frame, text='Statistics',background=BLUE,
+                             command=statistics_button_default)
 phrases_button.pack()
 
 # Start the main loop

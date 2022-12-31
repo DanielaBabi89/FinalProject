@@ -40,4 +40,4 @@ def define_group(groupName, group):
         exit()
 
 
-#print(define_group("first group", ["If", "I" ,"lost"]))
+print(define_group("new group", ["be" ,"lost"]))
