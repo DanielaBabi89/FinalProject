@@ -309,6 +309,35 @@ def get_word_by_Index(paragraph, line):
     return wordsIndex_df
 #---------------------------get_word_by_Index----------------------------#
 
+#---------------------------get_word_by_length----------------------------#
+def get_word_by_length(length):
+     # return DataFrame of all words from DB with the speciefic index
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    # get word indexes from DB by given paragraph and line
+    sql_words_table =  """SELECT words.[word]
+                            ,words.length
+                        FROM [FinalProject].[dbo].[words]
+                        WHERE words.length = ?"""
+    cursor.execute(sql_words_table, length)
+    
+    # define DF according to the SQL query
+    words_df = pandas.DataFrame(columns=["word", "length"])
+    
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        while row is not None:
+            words_df.loc[len(words_df)] = [row.word,
+                                            row.length]
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return words_df
+#---------------------------get_word_by_length----------------------------#
+
 #----------------------get_words_in_next_prev_lines----------------------#
 def get_words_in_next_prev_lines(word):
     # return DataFrame of all words from DB the located in the prev, cur, and next line of a given word
