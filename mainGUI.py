@@ -8,7 +8,10 @@ PURPLE = "#ADA2FF"
 BLUE = "#C0DEFF"
 PINK = "#FFE5F1"
 YELLOW = "#FFF8E1"
+RED = "#850000"
 FONT_BODY = ("Verdana", 12, "bold")
+FONT1 = ("Verdana", 30, "bold italic")
+FONT2 = ("Verdana", 10, "bold")
 
 # Create the main window
 window = tk.Tk()
@@ -18,12 +21,12 @@ screen_width = window.winfo_screenwidth()
 screen_height = window.winfo_screenheight()
 
 title = tk.Label(text="SONGS CONCORDANCE", 
-                font=("Verdana", 30, "bold italic"), 
+                font=FONT1, 
                 fg=PURPLE, justify=tk.CENTER, 
                 background=YELLOW)
 title.pack()
 title = tk.Label(text="Made By Daniela Babi", 
-                font=("Verdana", 15, "bold italic"), 
+                font=FONT1, 
                 fg=BLUE, justify=tk.CENTER, 
                 background=YELLOW)
 title.pack()
@@ -58,6 +61,19 @@ def show_result_table(df):
     # pack the treeview widget
     treeview.pack(expand=True, fill='both')
 
+def no_result_found():
+    # Clear the content frame
+    for widget in result_frame.winfo_children():
+        widget.destroy()
+
+    label = tk.Label(result_frame, 
+                    text='No Results Found',
+                    font=FONT2,
+                    fg=RED,
+                    background=YELLOW)
+    label.pack()
+    
+
 #-------------------songs - SEARCH BUTTONS-------------------#
 def search_by_song_button_result(name1):
     # Clear the content frame
@@ -66,41 +82,69 @@ def search_by_song_button_result(name1):
     # create a treeview widget to display the dataframe
     df = get_song_by_name(name1)
 
-    treeview = ttk.Treeview(result_frame, columns=df.columns, show='headings')
-
-    # set the column headings
-
-    for i, col in enumerate(df.columns):
-        treeview.heading(i, text=col)
-        
-    # add the data to the treeview
-    for i in df.index:
-        treeview.insert("", "end", values=list(df.iloc[i]))
-
-    # pack the treeview widget
-    treeview.pack(expand=True, fill='both')
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
 
 def search_by_song_artist_result(artist):
     df = get_songs_by_artist(artist)
-    show_result_table(df)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
 
 def search_by_song_word_result(word):
     df = get_songs_by_word(word)
-    show_result_table(df)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
 
 #-------------------words - SEARCH BUTTONS-------------------#
 def search_word_result(word):
     df = get_speciefic_word(word)
-    show_result_table(df)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
 
 def search_word_by_length_result(length):
     df = get_word_by_length(length)
-    show_result_table(df)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
 
 #-------------------word indexes - SEARCH BUTTONS-------------------#
 def search_word_by_index_result(paragraph, line):
     df = get_word_by_Index(paragraph, line)
-    show_result_table(df)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
+
+def search_index_of_word_result(word):
+    df = get_index_of_word(word)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
+
+def search_index_of_group_result(group):
+    df = get_index_of_group(group)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
+
+#-------------------group - SEARCH BUTTONS-------------------#
+def search_group_result(group):
+    df = get_speciefic_group(group)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
 
 #-------------------SEARCH FRAME-------------------#
 def show_songs_search():
@@ -139,7 +183,7 @@ def show_words_search():
         widget.destroy()
 
     # Create the entries and button, and add them to the second container
-    label = tk.Label(search_frame, text='Word', background=PINK)
+    label = tk.Label(search_frame, text='Word', font=FONT2, background=PINK)
     label.pack()
     word_entry1 = tk.Entry(search_frame)
     word_entry1.pack()
@@ -147,8 +191,9 @@ def show_words_search():
                                 command=lambda: search_word_result(word_entry1.get()))
     search_button.pack()
 
-
-    label = tk.Label(search_frame, text='Length of Words', background=PINK)
+    label = tk.Label(search_frame, text='Length of Words', font=FONT2, background=PINK)
+    label.pack()
+    label = tk.Label(search_frame, text='Length', background=PINK)
     label.pack()
     length_entry = tk.Entry(search_frame)
     length_entry.pack()
@@ -162,16 +207,27 @@ def show_indexes_search():
         widget.destroy()
 
     # Query - index by word
-    label = tk.Label(search_frame, text='Index of word', background=PINK)
+    label = tk.Label(search_frame, text='Index of word', font=FONT2, background=PINK)
     label.pack()
-    word_entry1 = tk.Entry(search_frame)
-    word_entry1.pack()
+    word_entry2 = tk.Entry(search_frame)
+    word_entry2.pack()
     search_button = tk.Button(search_frame, text='search',
-                                command=lambda: search_word_result(word_entry1.get()))
+                                command=lambda: search_index_of_word_result(word_entry2.get()))
+    search_button.pack()
+
+    # Query - index of group
+    label = tk.Label(search_frame, text='Index of group', font=FONT2, background=PINK)
+    label.pack()
+    label = tk.Label(search_frame, text='Group', background=PINK)
+    label.pack()
+    group_entry2 = tk.Entry(search_frame)
+    group_entry2.pack()
+    search_button = tk.Button(search_frame, text='search',
+                                command=lambda: search_index_of_group_result(group_entry2.get()))
     search_button.pack()
 
     # Query - word by index
-    label = tk.Label(search_frame, text='Word in index', background=PINK)
+    label = tk.Label(search_frame, text='Word in index', font=FONT2, background=PINK)
     label.pack()
     label = tk.Label(search_frame, text='Paragraph', background=PINK)
     label.pack()
@@ -195,7 +251,8 @@ def show_groups_search():
     label.pack()  
     group_name_entry = tk.Entry(search_frame)
     group_name_entry.pack()
-    search_index_by_group_button = tk.Button(search_frame, text='search')
+    search_index_by_group_button = tk.Button(search_frame, text='search',
+                                    command=lambda: search_group_result(group_name_entry.get()))
     search_index_by_group_button.pack()
 
 #-------------------DEFAULT BUTTONS SHOW-------------------#

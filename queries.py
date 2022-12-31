@@ -203,7 +203,6 @@ def get_full_groupDetails_table():
     return groups_df
 #-------------------------get_full_songs_table---------------------------#
 
-
 #-----------------------get_full_wordIndex_table-------------------------#
 def get_full_wordIndex_table():
      # return DataFrame of all words from DB with the speciefic index
@@ -492,6 +491,38 @@ def get_index_of_word(word):
     connection.close()
     return indexes_of_word_df
 #------------------------------get_index_of_word-------------------------#
+
+#---------------------------get_word_by_Index----------------------------#
+def get_speciefic_group(groupName):
+     # return DataFrame of all words from DB with the speciefic index
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    # get word indexes from DB by given paragraph and line
+    sql_group_table =  """SELECT [groupName]
+                                ,[word]
+                            FROM [FinalProject].[dbo].[groupDetails], 
+                                [FinalProject].[dbo].[group],
+                                [FinalProject].[dbo].[words]
+                            WHERE [groupDetails].wordID = [words].wordID 
+                                    and [groupDetails].groupID = [group].groupID
+                                    and [groupName] = ?"""
+    cursor.execute(sql_group_table, groupName)
+    
+    # define DF according to the SQL query
+    group_df = pandas.DataFrame(columns=["Group", "word"])
+    
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        while row is not None:
+            group_df.loc[len(group_df)] = [row.groupName, row.word]
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return group_df
+#---------------------------get_group_by_Index----------------------------#
 
 #------------------------------get_index_of_word-------------------------#
 def get_index_of_group(groupName):
