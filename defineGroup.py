@@ -19,10 +19,12 @@ def define_group(groupName, group):
 
         for word in group:    
             if (get_wordID(word) == -1):
-                wordID = get_last_id_from_word_table() +1
+                wordID = get_last_id_from_word_table() + 1
+                # word does not exists - add word to word table
+                insert_to_words(wordID, word, len(word))
             else:
                 wordID = get_wordID(word)
-                print(wordID)
+
 
             newLineToLoad = [groupID, wordID]
             groupDetails_df.loc[len(groupDetails_df)] = newLineToLoad
