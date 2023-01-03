@@ -47,6 +47,15 @@ search_frame.pack(side='left', fill=tk.BOTH)
 result_frame = tk.Frame(window, height=screen_height, width=screen_width*(7/10), background=YELLOW)
 result_frame.pack(side='left',fill=tk.BOTH, expand=True)
 
+def create_group_from_text(groupName, data):
+    print(data.pop())
+    print(type(data))
+    define_group(groupName, data)
+    
+    massage = groupName + ": " + ", ".join(data)
+    messagebox.showinfo('new group', "new group added: \n"+massage)
+    #refresh_groups()
+
 def create_group_from_db(groupName):
     selected_rows = treeview.selection()
     # Get the data of the selected rows
@@ -58,14 +67,7 @@ def create_group_from_db(groupName):
     
     massage = groupName + ": " + str(data)
     messagebox.showinfo('new group', "new group added: \n"+massage)
-
-def create_group_from_text(groupName, data):
-    print(data)
-    define_group(groupName, data)
     
-    massage = groupName + ": " + str(data)
-    messagebox.showinfo('new group', "new group added: \n"+massage)
-
 def show_result_table(df):
     # Clear the content frame
     for widget in result_frame.winfo_children():
@@ -188,6 +190,18 @@ def search_group_by_word_result(word):
     else:
         show_result_table(df)
 
+def words_for_group_button():
+    # Clear the content frame
+    for widget in result_frame.winfo_children():
+        widget.destroy()
+
+    df = get_full_words_table()
+    show_result_table(df)
+
+def refresh_groups():
+    df = get_full_groupDetails_table()
+    show_result_table(df)
+
 #-------------------phrase - SEARCH BUTTONS-------------------#
 def search_phrase_result(phrase):
     df = get_speciefic_phrase(phrase)
@@ -305,27 +319,6 @@ def show_words_search():
     search_range_word_button.pack() 
 
 
-    label = tk.Label(search_frame, text='*****', background=PINK)
-    label.pack(pady=15)
-    label = tk.Label(search_frame, text='Select or Type \n words to create\n new group',
-                    font=FONT2, background=PINK)
-    label.pack()
-    label = tk.Label(search_frame, text='Group Name', background=PINK)
-    label.pack()
-    new_group_entry = tk.Entry(search_frame)
-    new_group_entry.pack()
-
-    add_group_button = tk.Button(search_frame, text='create for selection',
-                                    command=lambda: create_group_from_db(new_group_entry.get()))
-    add_group_button.pack() 
-    label = tk.Label(search_frame, text='Words', background=PINK)
-    label.pack(pady=5)
-    text = tk.Text(search_frame, width=15, height=9)
-    text.pack()
-
-    add_group_button1 = tk.Button(search_frame, text='create from text',
-                command=lambda: create_group_from_text(new_group_entry.get(), text.get('1.0', 'end').split('\n')))
-    add_group_button1.pack(pady=5)
      
 
 def show_indexes_search():
@@ -391,6 +384,32 @@ def show_groups_search():
     search_index_by_group_button = tk.Button(search_frame, text='search',
                                     command=lambda: search_group_by_word_result(word_entry4.get()))
     search_index_by_group_button.pack()
+
+    
+    label = tk.Label(search_frame, text='*****', background=PINK)
+    label.pack(pady=15)
+    label = tk.Label(search_frame, text='Select or Type \n words to create\n new group',
+                    font=FONT2, background=PINK)
+    label.pack()
+    add_group_button = tk.Button(search_frame, text='words list', background=PINK,
+                                    command=words_for_group_button)
+    add_group_button.pack() 
+    label = tk.Label(search_frame, text='Group Name', background=PINK)
+    label.pack()
+    new_group_entry = tk.Entry(search_frame)
+    new_group_entry.pack()
+
+    add_group_button = tk.Button(search_frame, text='create for selection',
+                                    command=lambda: create_group_from_db(new_group_entry.get()))
+    add_group_button.pack() 
+    label = tk.Label(search_frame, text='Words', background=PINK)
+    label.pack(pady=5)
+    text = tk.Text(search_frame, width=15, height=9)
+    text.pack()
+
+    add_group_button1 = tk.Button(search_frame, text='create from text',
+                command=lambda: create_group_from_text(new_group_entry.get(), (text.get('1.0', 'end').split('\n'))))
+    add_group_button1.pack(pady=5)
 
 def show_phrases_search():
     # Clear the content frame

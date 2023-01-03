@@ -13,7 +13,7 @@ def define_group(groupName, group):
         # Add one line to phrase table
         groupID = get_last_id_from_group_table() + 1
         insert_to_group(groupID, groupName)
-
+        
         # Define DF for phraseDetails
         groupDetails_df = pandas.DataFrame(columns=["groupID","wordID"])
 
@@ -22,6 +22,7 @@ def define_group(groupName, group):
                 wordID = get_last_id_from_word_table() +1
             else:
                 wordID = get_wordID(word)
+                print(wordID)
 
             newLineToLoad = [groupID, wordID]
             groupDetails_df.loc[len(groupDetails_df)] = newLineToLoad
@@ -39,5 +40,3 @@ def define_group(groupName, group):
         print()
         exit()
 
-
-print(define_group("new group", ["be" ,"lost"]))
