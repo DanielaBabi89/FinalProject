@@ -6,8 +6,8 @@ from statisticQueries import *
 import tkinter.ttk as ttk
 from defineGroup import *
 from definePhrase import *
-
-
+from tkinter import filedialog
+from LoadTXT import *
 # Const colors:
 PURPLE = "#ADA2FF"
 BLUE = "#C0DEFF"
@@ -48,6 +48,14 @@ search_frame.pack(side='left', fill=tk.BOTH)
 # Create the third container - RESULTS
 result_frame = tk.Frame(window, height=screen_height, width=screen_width*(7/10), background=YELLOW)
 result_frame.pack(side='left',fill=tk.BOTH, expand=True)
+
+
+def load_new_song():
+    src = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
+    src_splited = src.split("/")
+    file_name = src_splited[len(src_splited)-1].split(".")[0]
+    dst = "C:/Users/babid/Desktop/FinalProject/songsCSV/" + file_name + ".csv"
+    load_song_to_DB(src, dst, file_name)
 
 def create_group_from_text(groupName, data):
     define_group(groupName, data)
@@ -581,6 +589,10 @@ phrases_button.pack()
 phrases_button = tk.Button(menu_frame, text='Statistics',background=BLUE,
                              command=statistics_button_default)
 phrases_button.pack()
+
+phrases_button = tk.Button(menu_frame, text='Add New Song', command=load_new_song)
+phrases_button.pack()
+
 
 # Start the main loop
 window.mainloop()

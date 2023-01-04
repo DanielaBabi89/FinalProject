@@ -1,17 +1,16 @@
 import tkinter as tk
 
 def selection_callback(event):
-    selection = event.widget.cget("textvariable")
-    print(f"Selection: {selection.get()}")
+    selection = event.widget.get("sel.first", "sel.last")
+    print(f"Selection: {selection}")
 
 root = tk.Tk()
 
-label_text = tk.StringVar()
-label = tk.Label(root, textvariable=label_text, bg="white")
-label.pack()
+text = tk.Text(root, bg="white")
+text.pack()
 
-label_text.set("Hello, World!")
+text.insert("1.0", "Hello, World!")
 
-label.bind("<Button-1>", selection_callback)
+text.bind("<Button-1>", selection_callback)
 
 root.mainloop()

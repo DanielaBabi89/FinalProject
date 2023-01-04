@@ -150,7 +150,7 @@ def load_song_to_DB(src, dst, fileName):
         insert_to_wordIndex(int(row['wordID']), int(row['songID']), int(row['paragraph']), int(row['line']), int(row['index']))
 
 
-src = "C:\\Users\\babid\\Desktop\\FinalProject\\songsTXT\\Witness - Ketty Perry.txt"
-dst = "C:\\Users\\babid\\Desktop\\FinalProject\\songsCSV\\Witness - Ketty Perry(toLoad).csv"
-fileName = "Witness - Ketty Perry"
-load_song_to_DB(src, dst, fileName)
+# src = "C:\\Users\\babid\\Desktop\\FinalProject\\songsTXT\\Witness - Ketty Perry.txt"
+# dst = "C:\\Users\\babid\\Desktop\\FinalProject\\songsCSV\\Witness - Ketty Perry(toLoad).csv"
+# fileName = "Witness - Ketty Perry"
+# load_song_to_DB(src, dst, fileName)
