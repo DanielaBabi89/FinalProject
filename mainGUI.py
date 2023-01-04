@@ -5,6 +5,7 @@ import tkinter.messagebox as messagebox
 from statisticQueries import *
 import tkinter.ttk as ttk
 from defineGroup import *
+from definePhrase import *
 
 
 # Const colors:
@@ -16,6 +17,7 @@ RED = "#850000"
 FONT_BODY = ("Verdana", 12, "bold")
 FONT1 = ("Verdana", 30, "bold italic")
 FONT2 = ("Verdana", 10, "bold")
+FONT3 = ("Verdana", 20, "bold")
 
 # Create the main window
 window = tk.Tk()
@@ -48,13 +50,10 @@ result_frame = tk.Frame(window, height=screen_height, width=screen_width*(7/10),
 result_frame.pack(side='left',fill=tk.BOTH, expand=True)
 
 def create_group_from_text(groupName, data):
-    print(data.pop())
-    print(type(data))
     define_group(groupName, data)
     
     massage = groupName + ": " + ", ".join(data)
     messagebox.showinfo('new group', "new group added: \n"+massage)
-    #refresh_groups()
 
 def create_group_from_db(groupName):
     selected_rows = treeview.selection()
@@ -164,15 +163,19 @@ def search_index_of_group_result(group):
         show_result_table(df)
 
 def search_range_word_result(word):
+    # Clear the content frame
+    for widget in result_frame.winfo_children():
+        widget.destroy()
+    
     range_string = get_words_in_next_prev_lines(word)
-    range_string = range_string.replace(word, " **" + word + "** ")
-    #messagebox.showinfo(word , range_string)
-    popup = tk.Toplevel()
-    popup.title(word)
-
-    # Add a label to the pop-up window with the string "Hello, world!"
-    label = tk.Label(popup, text=range_string, font=("Arial", 12))
-    label.pack()
+    if range_string != "":
+        range_string = range_string.replace(word, " **" + word + "** ")
+        label = tk.Label(result_frame,text=range_string, 
+                        font=FONT3,
+                        background=YELLOW)
+        label.pack(pady=50)
+    else:
+        no_result_found()
 
 
 #-------------------group - SEARCH BUTTONS-------------------#
@@ -216,6 +219,26 @@ def search_phrase_by_word_result(word):
         no_result_found()
     else:
         show_result_table(df)
+
+def search_phrase_in_song_result (phrase):
+    for widget in result_frame.winfo_children():
+        widget.destroy()
+
+    range_string = search_phrase_in_songs(phrase)
+    if range_string != "":
+        range_string = range_string.replace(phrase, " **" + phrase + "** ")
+        label = tk.Label(result_frame,text=range_string, 
+                        font=FONT3,
+                        background=YELLOW)
+        label.pack(pady=50)
+    else:
+        no_result_found()
+    
+def create_phrase_from_text(name, phrase):
+    define_phrase(name, phrase)
+    
+    massage = name + ": " + phrase
+    messagebox.showinfo('new phrase', "new phrase added: \n"+massage)
 
 #-------------------Statistics - SEARCH BUTTONS-------------------#
 def by_paragraph_statistics(song):
@@ -317,9 +340,6 @@ def show_words_search():
     search_range_word_button = tk.Button(search_frame, text='search',
                                     command=lambda: search_range_word_result(word_entry6.get()))
     search_range_word_button.pack() 
-
-
-     
 
 def show_indexes_search():
     # Clear the content frame
@@ -434,6 +454,35 @@ def show_phrases_search():
     search_index_by_group_button = tk.Button(search_frame, text='search',
                                     command=lambda: search_phrase_by_word_result(word_entry5.get()))
     search_index_by_group_button.pack()
+
+    label = tk.Label(search_frame, text='Phrase in songs', font=FONT2)
+    label.pack()  
+    label = tk.Label(search_frame, text='phrase')
+    label.pack()  
+    word_entry8 = tk.Entry(search_frame)
+    word_entry8.pack()
+    search_phrase_in_song_button = tk.Button(search_frame, text='search',
+                                    command=lambda: search_phrase_in_song_result(word_entry8.get()))
+    search_phrase_in_song_button.pack()
+
+    label = tk.Label(search_frame, text='*****', background=PINK)
+    label.pack(pady=15)
+    label = tk.Label(search_frame, text='Select or Type \n words to create\n new phrase',
+                    font=FONT2, background=PINK)
+    label.pack()
+    label = tk.Label(search_frame, text='Phrase Name', background=PINK)
+    label.pack()
+    new_phrase_entry = tk.Entry(search_frame)
+    new_phrase_entry.pack()
+    label = tk.Label(search_frame, text='The phrase', background=PINK)
+    label.pack()
+    phrase_entry = tk.Entry(search_frame)
+    phrase_entry.pack()
+    add_group_button = tk.Button(search_frame, text='create phrase',
+                                    command=lambda: create_phrase_from_text(
+                                        new_phrase_entry.get(),
+                                        phrase_entry.get()))
+    add_group_button.pack() 
 
 def show_statistics_search():
     # Clear the content frame

@@ -478,8 +478,6 @@ def get_words_by_index(paragraph, line):
     # for example: line number 2 in paragraph 2 --> is line number 7 in the DB.
     real_line = int(get_first_lineNum_in_paragraph(paragraph)["firstLine"][0]) + line - 1
 
-    print(real_line)
-
     sql_query = """SELECT word
                         ,song
                         ,artist
@@ -713,5 +711,40 @@ def df_to_csv(df, file_name, dst_path):
     df.to_csv(dst_path + "\"" + file_name + ".csv",)
 #----------------------------------df_to_csv-----------------------------#
 
+def search_phrase_in_songs(phrase):
+    phrase_to_list = phrase.split()
+    context_origin = get_words_in_next_prev_lines(phrase_to_list[0])
+    context_str = context_origin.replace("\n","")
 
+    if len(phrase_to_list) == 1:
+        return context_origin
+
+    context_line_list = context_origin.split("\n")
+    indexes = []
+    index_in_lines_list = []
+
+    # find apearances of the phrase
+    start = context_str.find(phrase)
+    while start != -1:
+        # save the index in the context list of lines
+        context_start_from_phrase = context_origin[start:].split("\n")
+        x = len(context_line_list) - len(context_start_from_phrase)
+        index_in_lines_list.append(x)
+        # save the index in the context string
+        indexes.append(start)
+        context_substring = context_str[start+1:]
+        print(context_substring)
+        start = context_substring.find(phrase)
+
+    # concatenate lines close to the phrase
+    str  = ""
+    for i in index_in_lines_list:
+        if i-1 in range(0, len(context_line_list)):
+            str += context_line_list[i-1]+"\n"
+        if i in range(0, len(context_line_list)):
+            str += context_line_list[i]+"\n"
+        if i+1 in range(0, len(context_line_list)):
+            str += context_line_list[i+1]+"\n\n"
+    
+    return str
 

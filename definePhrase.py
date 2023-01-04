@@ -23,6 +23,8 @@ def define_phrase(phraseName, phrase):
         for word in phrase_toList:    
             if (get_wordID(word) == -1):
                 wordID = get_last_id_from_word_table() +1
+                # word does not exists - add word to word table
+                insert_to_words(wordID, word, len(word))
             else:
                 wordID = get_wordID(word)
 
