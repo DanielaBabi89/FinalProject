@@ -7,6 +7,13 @@ from InsertToDBTables import *
 # This file parse txt file to 3 tables.
 # after parsing, it adds the table to DB (call to InsertToDBTables file)
 
+def clean_word(word):
+    cleaned = word.replace("'ve", "").replace("'ll", "").replace("'d", "")  
+    cleaned = cleaned.replace("'m", "").replace("'s", "").replace("'re", "")
+    if (cleaned[0] == "'"):
+        cleaned = cleaned[1:]
+    return cleaned
+
 def txt_to_table (src, dst, fileName, last_songID, last_wordID):
     #-----create song DF--------
     songName = fileName.split(" - ")[0]
@@ -20,7 +27,7 @@ def txt_to_table (src, dst, fileName, last_songID, last_wordID):
     with open(src, 'r', encoding='utf-8') as f:
         fullSong = f.read()
 
-    charctersToAvoid = "!#$%^&*(),.?" 
+    charctersToAvoid = "!#$%^&*()-,.?" 
     for charcter in charctersToAvoid:
         fullSong = fullSong.replace(charcter, " ")
 
@@ -37,7 +44,7 @@ def txt_to_table (src, dst, fileName, last_songID, last_wordID):
             #split each line into words
             words = line.split()
             for word in words:
-                newLineToLoad = [word,songName,paragraphCounter,lineCounter,wordCounter]
+                newLineToLoad = [clean_word(word),songName,paragraphCounter,lineCounter,wordCounter]
                 wordCounter+=1
                 wordIndex_table.loc[len(wordIndex_table.index)] = newLineToLoad
             lineCounter+=1

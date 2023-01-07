@@ -57,24 +57,6 @@ def load_new_song():
     dst = "C:/Users/babid/Desktop/FinalProject/songsCSV/" + file_name + ".csv"
     load_song_to_DB(src, dst, file_name)
 
-def create_group_from_text(groupName, data):
-    define_group(groupName, data)
-    
-    massage = groupName + ": " + ", ".join(data)
-    messagebox.showinfo('new group', "new group added: \n"+massage)
-
-def create_group_from_db(groupName):
-    selected_rows = treeview.selection()
-    # Get the data of the selected rows
-    data = []
-    for row in selected_rows:
-        item = treeview.item(row)
-        data.append(item['values'][1])
-    define_group(groupName, data)
-    
-    massage = groupName + ": " + str(data)
-    messagebox.showinfo('new group', "new group added: \n"+massage)
-    
 def show_result_table(df):
     # Clear the content frame
     for widget in result_frame.winfo_children():
@@ -132,6 +114,29 @@ def search_by_song_word_result(word):
         no_result_found()
     else:
         show_result_table(df)
+
+def read_song_on_click():
+    selected_rows = treeview.selection()
+    # Get the data of the selected rows
+    item = treeview.item(selected_rows[0])
+     # Clear the content frame
+    path_column = len(item['values']) - 1
+    path = item['values'][path_column]
+    with open(path, mode="r") as file:
+        song = file.read()
+
+    if song and song != "":
+        songs_button_default()
+        scrollbar = tk.Scrollbar(result_frame)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Create a Text widget
+        text = tk.Text(result_frame, yscrollcommand=scrollbar.set)
+        text.insert(tk.END, song)
+        scrollbar.config(command=text.yview)
+        text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    else:
+        no_result_found()
 
 #-------------------words - SEARCH BUTTONS-------------------#
 def search_word_result(word):
@@ -213,6 +218,24 @@ def refresh_groups():
     df = get_full_groupDetails_table()
     show_result_table(df)
 
+def create_group_from_db(groupName):
+    selected_rows = treeview.selection()
+    # Get the data of the selected rows
+    data = []
+    for row in selected_rows:
+        item = treeview.item(row)
+        data.append(item['values'][1])
+    define_group(groupName, data)
+    
+    massage = groupName + ": " + str(data)
+    messagebox.showinfo('new group', "new group added: \n"+massage)
+    
+def create_group_from_text(groupName, data):
+    define_group(groupName, data)
+    
+    massage = groupName + ": " + ", ".join(data)
+    messagebox.showinfo('new group', "new group added: \n"+massage)
+
 #-------------------phrase - SEARCH BUTTONS-------------------#
 def search_phrase_result(phrase):
     df = get_speciefic_phrase(phrase)
@@ -290,6 +313,10 @@ def show_songs_search():
     for widget in search_frame.winfo_children():
         widget.destroy()
 
+    read_song_button = tk.Button(search_frame, text='READ', 
+                            command=read_song_on_click)
+    read_song_button.pack()
+    
     # Create the entries and button, and add them to the second container
     label = tk.Label(search_frame, text='Song name', background=PINK)
     label.pack()
@@ -592,6 +619,7 @@ phrases_button.pack()
 
 phrases_button = tk.Button(menu_frame, text='Add New Song', command=load_new_song)
 phrases_button.pack()
+
 
 
 # Start the main loop
