@@ -421,12 +421,13 @@ def get_words_in_next_prev_lines(word):
                         ,[paragraph]
                         ,[line]
                         ,[indexNum]
-                    from [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words], [FinalProject].[dbo].[songs]
+                    from [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words], [FinalProject].[dbo].[songs] as s
                     where [words].wordID = [wordIndex].wordID and 
-                            [songs].songID = [wordIndex].songID and
+                            s.songID = [wordIndex].songID and
                             wordIndex.line in (select line - 1 
                                                 FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
                                                 WHERE [words].wordID = [wordIndex].wordID and
+													s.songID = [wordIndex].songID and
                                                         [words].word = ?
 
                                                 union
@@ -434,6 +435,7 @@ def get_words_in_next_prev_lines(word):
                                                 select line 
                                                 FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
                                                 WHERE [words].wordID = [wordIndex].wordID and
+												s.songID = [wordIndex].songID and
                                                         [words].word = ?
 
                                                 union 
@@ -441,8 +443,9 @@ def get_words_in_next_prev_lines(word):
                                                 select line + 1
                                                 FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
                                                 WHERE [words].wordID = [wordIndex].wordID and
+												s.songID = [wordIndex].songID and
                                                         [words].word = ?)
-                    order by [indexNum] """
+                    order by [songID], [indexNum]"""
 
     cursor.execute(sql_query,word, word, word)
 
@@ -464,7 +467,7 @@ def get_words_in_next_prev_lines(word):
 
     cursor.close()
     connection.close()
-    return concatenate__into_str(wordsIndex_inRange_df)
+    return wordsIndex_inRange_df
 #----------------------get_words_in_next_prev_lines----------------------#
 
 #-----------------------------get_words_by_index-------------------------#
@@ -526,20 +529,22 @@ def get_index_of_word(word):
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
 
-    sql_query = """SELECT [wordIndex].[wordID]
-                        ,[songID]
+    sql_query = """SELECT words.[word]
+                        ,songs.song
                         ,[paragraph]
                         ,[line]
                         ,[indexNum]
-                    FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
+                    FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words],
+                            [FinalProject].[dbo].songs
                     WHERE [wordIndex].[wordID] = [words].[wordID]
+                            and [songs].songID = [wordIndex].songID
                             and word = ?"""
 
     cursor.execute(sql_query,word)
 
     # define DF according to the SQL query
-    indexes_of_word_df = pandas.DataFrame(columns=["wordID",
-                                                 "songID", 
+    indexes_of_word_df = pandas.DataFrame(columns=["word",
+                                                 "song", 
                                                  "paragraph", 
                                                  "line", 
                                                  "indexNum"])
@@ -549,8 +554,8 @@ def get_index_of_word(word):
     if(row != None):
         while row is not None:
             indexes_of_word_df.loc[len(indexes_of_word_df)] = [
-                                                 row.wordID, 
-                                                 row.songID, 
+                                                 row.word, 
+                                                 row.song, 
                                                  row.paragraph, 
                                                  row.line, 
                                                  row.indexNum]
@@ -713,38 +718,9 @@ def df_to_csv(df, file_name, dst_path):
 
 def search_phrase_in_songs(phrase):
     phrase_to_list = phrase.split()
-    context_origin = get_words_in_next_prev_lines(phrase_to_list[0])
-    context_str = context_origin.replace("\n","")
+    context = concatenate__into_str2(get_words_in_next_prev_lines(phrase_to_list[0]), phrase)
+    context = context.split("_")
 
-    if len(phrase_to_list) == 1:
-        return context_origin
+    return seperate_string_to_lines(context, phrase)
 
-    context_line_list = context_origin.split("\n")
-    indexes = []
-    index_in_lines_list = []
-
-    # find apearances of the phrase
-    start = context_str.find(phrase)
-    while start != -1:
-        # save the index in the context list of lines
-        context_start_from_phrase = context_origin[start:].split("\n")
-        x = len(context_line_list) - len(context_start_from_phrase)
-        index_in_lines_list.append(x)
-        # save the index in the context string
-        indexes.append(start)
-        context_substring = context_str[start+1:]
-        print(context_substring)
-        start = context_substring.find(phrase)
-
-    # concatenate lines close to the phrase
-    str  = ""
-    for i in index_in_lines_list:
-        if i-1 in range(0, len(context_line_list)):
-            str += context_line_list[i-1]+"\n"
-        if i in range(0, len(context_line_list)):
-            str += context_line_list[i]+"\n"
-        if i+1 in range(0, len(context_line_list)):
-            str += context_line_list[i+1]+"\n\n"
-    
-    return str
-
+search_phrase_in_songs("I lost")

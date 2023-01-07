@@ -9,6 +9,7 @@ from definePhrase import *
 from tkinter import filedialog
 from LoadTXT import *
 from tkinter import PhotoImage
+from auxiliaryQueries import *
 
 # fonts and colors:
 PURPLE = "#7B2869"
@@ -56,6 +57,9 @@ def load_new_song():
     file_name = src_splited[len(src_splited)-1].split(".")[0]
     dst = "C:/Users/babid/Desktop/FinalProject/songsCSV/" + file_name + ".csv"
     load_song_to_DB(src, dst, file_name)
+
+    messagebox.showinfo('new song', "Song added successfully")
+    
 
 def show_result_table(df):
     # Clear the content frame
@@ -180,13 +184,18 @@ def search_range_word_result(word):
     for widget in result_frame.winfo_children():
         widget.destroy()
     
-    range_string = get_words_in_next_prev_lines(word)
+    range_string = concatenate__into_str(get_words_in_next_prev_lines(word))
     if range_string != "":
+        scrollbar = tk.Scrollbar(result_frame)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
         range_string = range_string.replace(word, " **" + word + "** ")
-        label = tk.Label(result_frame,text=range_string, 
-                        font=FONT3,
-                        background=YELLOW)
-        label.pack(pady=50)
+        # Create a Text widget
+        text = tk.Text(result_frame, yscrollcommand=scrollbar.set)
+        text.insert(tk.END, range_string)
+        scrollbar.config(command=text.yview)
+        text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
     else:
         no_result_found()
 
@@ -257,11 +266,15 @@ def search_phrase_in_song_result (phrase):
 
     range_string = search_phrase_in_songs(phrase)
     if range_string != "":
+        scrollbar = tk.Scrollbar(result_frame)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
         range_string = range_string.replace(phrase, " **" + phrase + "** ")
-        label = tk.Label(result_frame,text=range_string, 
-                        font=FONT3,
-                        background=YELLOW)
-        label.pack(pady=50)
+        # Create a Text widget
+        text = tk.Text(result_frame, yscrollcommand=scrollbar.set)
+        text.insert(tk.END, range_string)
+        scrollbar.config(command=text.yview)
+        text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     else:
         no_result_found()
     
@@ -314,11 +327,15 @@ def show_songs_search():
         widget.destroy()
 
     # -----> show full song text
+    label = tk.Label(search_frame, text='Choose song', background=PINK)
+    label.pack()
     read_song_button = tk.Button(search_frame, text='READ', 
                             command=read_song_on_click)
     read_song_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     read_song_button.pack()
-    
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack()
+
     # -----> search by song name
     label = tk.Label(search_frame, text='Song name', background=PINK)
     label.pack()
@@ -328,6 +345,8 @@ def show_songs_search():
                             command=lambda: search_by_song_button_result(song_name_entry.get()))
     search_by_song_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     search_by_song_button.pack()
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack()
 
     # -----> search by artist name
     label = tk.Label(search_frame, text='Artist', background=PINK)
@@ -338,6 +357,8 @@ def show_songs_search():
                             command=lambda: search_by_song_artist_result(artist_entry.get()))
     search_by_artist_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     search_by_artist_button.pack()
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack()
 
     # -----> search by word
     label = tk.Label(search_frame, text='Word', background=PINK)
@@ -363,6 +384,8 @@ def show_words_search():
                                 command=lambda: search_word_result(word_entry1.get()))
     search_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     search_button.pack()
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack()
 
     # -----> search by length
     label = tk.Label(search_frame, text='Length of Words', font=FONT2, background=PINK)
@@ -375,6 +398,8 @@ def show_words_search():
                                     command=lambda: search_word_by_length_result(length_entry.get()))
     search_by_length_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     search_by_length_button.pack()  
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack()
 
     # -----> search word in its range
     label = tk.Label(search_frame, text='Range of Word', font=FONT2, background=PINK)
@@ -402,6 +427,8 @@ def show_indexes_search():
                                 command=lambda: search_index_of_word_result(word_entry2.get()))
     search_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     search_button.pack()
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack()
 
     # -----> search index of group 
     label = tk.Label(search_frame, text='Index of group', font=FONT2, background=PINK)
@@ -414,6 +441,8 @@ def show_indexes_search():
                                 command=lambda: search_index_of_group_result(group_entry2.get()))
     search_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     search_button.pack()
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack()
 
     # -----> search by index
     label = tk.Label(search_frame, text='Word in index', font=FONT2, background=PINK)
@@ -444,6 +473,8 @@ def show_groups_search():
     search_index_by_group_button = tk.Button(search_frame, text='search',
                                     command=lambda: search_group_result(group_name_entry.get()))
     search_index_by_group_button.pack()
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack()
 
     # -----> search group by word
     label = tk.Label(search_frame, text='Group by word', font=FONT2, background=PINK)
@@ -456,10 +487,11 @@ def show_groups_search():
                                     command=lambda: search_group_by_word_result(word_entry4.get()))
     search_index_by_group_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     search_index_by_group_button.pack()
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack(pady=15)
 
     # > INSERT NEW GROUPS
-    label = tk.Label(search_frame, text='*****', background=PINK)
-    label.pack(pady=15)
+
     label = tk.Label(search_frame, text='Select or Type \n words to create\n new group',
                     font=FONT2, background=PINK)
     label.pack()
@@ -477,7 +509,7 @@ def show_groups_search():
     new_group_entry.pack()
 
     # -----> create group from selection
-    add_group_button = tk.Button(search_frame, text='create from selection',
+    add_group_button = tk.Button(search_frame, text='from selection',
                                     command=lambda: create_group_from_db(new_group_entry.get()))
     add_group_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     add_group_button.pack() 
@@ -488,7 +520,7 @@ def show_groups_search():
 
     # -----> create group from text
 
-    add_group_button1 = tk.Button(search_frame, text='create from text',
+    add_group_button1 = tk.Button(search_frame, text='from text',
                 command=lambda: create_group_from_text(new_group_entry.get(), (text.get('1.0', 'end').split('\n'))))
     add_group_button1.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     add_group_button1.pack(pady=5)
@@ -507,6 +539,8 @@ def show_phrases_search():
                                     command=lambda: search_phrase_result(phrase_name_entry.get()))
     search_index_by_group_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     search_index_by_group_button.pack()
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack()
 
     # -----> search phrase by word
     label = tk.Label(search_frame, text='Phrase by word', font=FONT2, background=PINK)
@@ -519,6 +553,8 @@ def show_phrases_search():
                                     command=lambda: search_phrase_by_word_result(word_entry5.get()))
     search_index_by_group_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     search_index_by_group_button.pack()
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack()
 
     # -----> search phrase in songs and show context
     label = tk.Label(search_frame, text='Phrase in songs', font=FONT2, background=PINK)
@@ -531,12 +567,11 @@ def show_phrases_search():
                                     command=lambda: search_phrase_in_song_result(word_entry8.get()))
     search_phrase_in_song_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     search_phrase_in_song_button.pack()
-
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack(pady=15)
 
     # > INSERT NEW PHRASES
-    label = tk.Label(search_frame, text='*****', background=PINK)
-    label.pack(pady=15)
-    label = tk.Label(search_frame, text='Select or Type \n words to create\n new phrase',
+    label = tk.Label(search_frame, text='Type words\n to create\n new phrase',
                     font=FONT2, background=PINK)
     label.pack()
 
@@ -562,22 +597,25 @@ def show_statistics_search():
         widget.destroy()
 
     # Create the entries and button, and add them to the second container
-    label = tk.Label(search_frame, text='Song Statistics', font=FONT2)
+    label = tk.Label(search_frame, text='Song Statistics', font=FONT2, background=PINK)
     label.pack()  
     song_entry = tk.Entry(search_frame)
     song_entry.pack()
 
     paragraph_stats_button = tk.Button(search_frame, text='By Paragraphs',
                                     command=lambda: by_paragraph_statistics(song_entry.get()))
-    paragraph_stats_button.pack()
+    paragraph_stats_button.configure(width=11, background=YELLOW2)
+    paragraph_stats_button.pack(pady=2)
 
     line_stats_button = tk.Button(search_frame, text='By Lines',
                                     command=lambda: by_line_statistics(song_entry.get()))
-    line_stats_button.pack()
+    line_stats_button.configure(width=11, background=YELLOW2)
+    line_stats_button.pack(pady=2)
 
     song_stats_button = tk.Button(search_frame, text='By Words',
                                     command=lambda: by_word_statistics(song_entry.get()))
-    song_stats_button.pack()
+    song_stats_button.configure(width=11, background=YELLOW2)
+    song_stats_button.pack(pady=2)
 
     frequency_button = tk.Button(search_frame, text='Full Frequency List', background=PURPLE,
                                     command=frequency_list_statistics)
@@ -644,11 +682,11 @@ words_button = tk.Button(menu_frame, text='Words', command=words_button_default)
 indexes_button = tk.Button(menu_frame, text='Indexes', command=indexes_button_default)
 groups_button = tk.Button(menu_frame, text='Groups', command=groups_button_default)
 phrases_button = tk.Button(menu_frame, text='Phrases', command=phrases_button_default)
-phrases_button = tk.Button(menu_frame, text='Statistics', command=statistics_button_default)
+statistics_button = tk.Button(menu_frame, text='Statistics', command=statistics_button_default)
 add_button = tk.Button(menu_frame, text='Add New Song', command=load_new_song)
 
 #----------------configure and pack the buttons
-songs_button.configure(width=12, font=FONTB, background=YELLOW, relief="ridge")
+songs_button.configure(width=12, font=FONTB, background=YELLOW)
 songs_button.pack()
 words_button.configure(width=12, font=FONTB, background=YELLOW)
 words_button.pack()
@@ -658,8 +696,8 @@ groups_button.configure(width=12, font=FONTB, background=YELLOW)
 groups_button.pack()
 phrases_button.configure(width=12, font=FONTB, background=YELLOW)
 phrases_button.pack()
-phrases_button.configure(width=12, font=FONTB, background=YELLOW)
-phrases_button.pack()
+statistics_button.configure(width=12, font=FONTB, background=YELLOW)
+statistics_button.pack()
 add_button.configure(width=12, font=FONTB, background=YELLOW)
 add_button.pack()
 
