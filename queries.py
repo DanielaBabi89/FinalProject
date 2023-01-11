@@ -1,6 +1,8 @@
 import pyodbc
 import pandas
 from auxiliaryQueries import *
+import nltk
+from nltk.stem.snowball import SnowballStemmer
 
 # TODO: Add try & except
 
@@ -716,6 +718,7 @@ def df_to_csv(df, file_name, dst_path):
     df.to_csv(dst_path + "\"" + file_name + ".csv",)
 #----------------------------------df_to_csv-----------------------------#
 
+#--------------------------search_phrase_in_songs------------------------#
 def search_phrase_in_songs(phrase):
     phrase_to_list = phrase.split()
     context = concatenate__into_str2(get_words_in_next_prev_lines(phrase_to_list[0]), phrase)
@@ -723,4 +726,16 @@ def search_phrase_in_songs(phrase):
 
     return seperate_string_to_lines(context, phrase)
 
-search_phrase_in_songs("I lost")
+#--------------------------search_phrase_in_songs------------------------#
+def get_word_by_stem(given_word):
+    stemmer = SnowballStemmer("english")
+    
+    df = get_full_words_table()
+    stems_column = [stemmer.stem(word) for word in df["word"]]
+    df["stem"] = stems_column
+    result = df[df["stem"] == stemmer.stem(given_word)].reset_index()
+    result.drop(columns=["index"],inplace=True)
+    return result
+#-----------------------------get_words_by_stem--------------------------#
+print(get_word_by_stem("losting"))
+

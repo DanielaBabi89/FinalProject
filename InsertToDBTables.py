@@ -1,6 +1,7 @@
 import pyodbc
 import pandas
 from auxiliaryQueries import *
+
 # this file contain function for each table in DB. 
 # each function get the rellavent fields as a parameters.
 

@@ -78,7 +78,6 @@ def txt_to_table (src, dst, fileName, last_songID, last_wordID):
 
     return songs_table, words_table, wordIndex_table
 
-
 def get_word_id(word):
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()

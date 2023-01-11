@@ -157,6 +157,13 @@ def search_word_by_length_result(length):
     else:
         show_result_table(df)
 
+def search_word_by_stem(word):
+    df = get_word_by_stem(word)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
+
 #-------------------word indexes - SEARCH BUTTONS-------------------#
 def search_word_by_index_result(paragraph, line):
     df = get_word_by_Index(paragraph, line)
@@ -411,7 +418,21 @@ def show_words_search():
     search_range_word_button = tk.Button(search_frame, text='search',
                                     command=lambda: search_range_word_result(word_entry6.get()))
     search_range_word_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
-    search_range_word_button.pack() 
+    search_range_word_button.pack()
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack()
+
+    # -----> search word in its range
+    label = tk.Label(search_frame, text='Search words\n by stem !!!', font=FONT2, background=PINK)
+    label.pack()
+    label = tk.Label(search_frame, text='Word \ stem', background=PINK)
+    label.pack()
+    stem_entry = tk.Entry(search_frame)
+    stem_entry.pack()
+    search_by_stem_button = tk.Button(search_frame, text='search',
+                                    command=lambda: search_word_by_stem(stem_entry.get()))
+    search_by_stem_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
+    search_by_stem_button.pack()  
 
 def show_indexes_search():
     # Clear the content frame
