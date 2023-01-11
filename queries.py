@@ -4,10 +4,10 @@ from auxiliaryQueries import *
 import nltk
 from nltk.stem.snowball import SnowballStemmer
 
-# TODO: Add try & except
 
 #----------------------------get_song_by_name----------------------------#
 def get_song_by_name(song_name):
+    song_name = song_name.lower()
     # get song name
     # return the rellavent row from DB if exist (as dictionary), else return None
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
@@ -43,6 +43,8 @@ def get_song_by_name(song_name):
 
 #---------------------------get_songs_by_artist--------------------------#
 def get_songs_by_artist(artist):
+    artist = artist.lower()
+
     # get artist name
     # return DF with the rellavent rows from DB
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
@@ -77,6 +79,8 @@ def get_songs_by_artist(artist):
 
 #---------------------------get_songs_by_word----------------------------#
 def get_songs_by_word(word):
+    word = word.lower()
+
     # get some words
     # return list of songs contain this word from DB if exist, else return None
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
@@ -316,6 +320,7 @@ def get_speciefic_phrase(phrase):
 
 #---------------------------get_word_by_Index----------------------------#
 def get_speciefic_word(word):
+    word = word.lower()
      # return DataFrame of all words from DB with the speciefic index
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
@@ -412,6 +417,7 @@ def get_word_by_length(length):
 
 #----------------------get_words_in_next_prev_lines----------------------#
 def get_words_in_next_prev_lines(word):
+    word = word.lower()
     # return DataFrame of all words from DB the located in the prev, cur, and next line of a given word
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
@@ -527,7 +533,8 @@ def get_words_by_index(paragraph, line):
 
 #------------------------------get_index_of_word-------------------------#
 def get_index_of_word(word):
-     # return DataFrame of all indexes of given word
+    word = word.lower()
+    # return DataFrame of all indexes of given word
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
 
@@ -602,6 +609,8 @@ def get_speciefic_group(groupName):
 
 #---------------------------get_group_by_word----------------------------#
 def get_group_by_word(word):
+    word = word.lower()
+
      # return DataFrame of all words from DB with the speciefic index
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
@@ -634,6 +643,7 @@ def get_group_by_word(word):
 
 #---------------------------get_phrase_by_word----------------------------#
 def get_phrase_by_word(word):
+    word = word.lower()
      # return DataFrame of all words from DB with the speciefic index
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
@@ -728,6 +738,8 @@ def search_phrase_in_songs(phrase):
 
 #--------------------------search_phrase_in_songs------------------------#
 def get_word_by_stem(given_word):
+    word = word.lower()
+
     stemmer = SnowballStemmer("english")
     
     df = get_full_words_table()
@@ -737,5 +749,5 @@ def get_word_by_stem(given_word):
     result.drop(columns=["index"],inplace=True)
     return result
 #-----------------------------get_words_by_stem--------------------------#
-print(get_word_by_stem("losting"))
+
 

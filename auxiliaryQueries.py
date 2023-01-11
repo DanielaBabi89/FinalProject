@@ -1,8 +1,6 @@
 import pyodbc
 import pandas
 
-# TODO: Add try & except
-
 
 def get_first_lineNum_in_paragraph(paragraph):
     # get paragraph number

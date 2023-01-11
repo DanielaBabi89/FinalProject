@@ -7,6 +7,8 @@ from auxiliaryQueries import *
 
 #----------------------------insert_to_songs----------------------------#
 def insert_to_songs(songID, song, artist, txtlink):
+    song = song.lower()
+    artist = artist.lower()
     # Exception Handling
     try:
         # connect to DB
@@ -41,7 +43,7 @@ def insert_to_songs(songID, song, artist, txtlink):
 
 #----------------------------insert_to_words----------------------------#
 def insert_to_words(wordID, word, length):
-
+    word = word.lower()
     # Exception Handling
     try:
         # connect to DB

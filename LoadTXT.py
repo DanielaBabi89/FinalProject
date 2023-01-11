@@ -14,6 +14,7 @@ def clean_word(word):
         cleaned = cleaned[1:]
     return cleaned
 
+
 def txt_to_table (src, dst, fileName, last_songID, last_wordID):
     #-----create song DF--------
     songName = fileName.split(" - ")[0]
@@ -77,6 +78,7 @@ def txt_to_table (src, dst, fileName, last_songID, last_wordID):
     print(wordIndex_table)
 
     return songs_table, words_table, wordIndex_table
+
 
 def get_word_id(word):
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
@@ -155,8 +157,3 @@ def load_song_to_DB(src, dst, fileName):
     for index, row in wordIndex_table.iterrows():
         insert_to_wordIndex(int(row['wordID']), int(row['songID']), int(row['paragraph']), int(row['line']), int(row['index']))
 
-
-# src = "C:\\Users\\babid\\Desktop\\FinalProject\\songsTXT\\Witness - Ketty Perry.txt"
-# dst = "C:\\Users\\babid\\Desktop\\FinalProject\\songsCSV\\Witness - Ketty Perry(toLoad).csv"
-# fileName = "Witness - Ketty Perry"
-# load_song_to_DB(src, dst, fileName)
