@@ -1,7 +1,7 @@
 import pyodbc
 import pandas
 
-
+#------------------------ID's from tables------------------------#
 def get_first_lineNum_in_paragraph(paragraph):
     # get paragraph number
     # return the first line number in this paragraph **in each song**
@@ -63,7 +63,32 @@ def get_first_wordNum_in_line(line):
     return first_lines_df
 
 
-def get_last_id_from_phrase_table ():
+def get_wordID(word):
+    #return the last ID that in the DB tables: words and songs
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    #find last wordID to continue from it
+    sql_max_wordID= """select wordID
+                        from words
+                        where word = ?"""
+
+    cursor.execute(sql_max_wordID, word)
+    wordID = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    if (wordID == None): # first row
+        return -1
+    else:
+        return wordID.wordID
+#------------------------ID's from tables------------------------#
+
+
+
+#----------------------last ID's from tables---------------------#
+def get_last_id_from_phrase_table():
     # return the last phraseID in phrase table
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
@@ -85,7 +110,7 @@ def get_last_id_from_phrase_table ():
         return last_phraseID.max
 
 
-def get_last_id_from_word_table ():
+def get_last_id_from_word_table():
     #return the last ID that in the DB tables: words and songs
     connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
     cursor = connection.cursor()
@@ -104,28 +129,6 @@ def get_last_id_from_word_table ():
         return 0
     else:
         return last_wordID.max
-
-
-def get_wordID (word):
-    #return the last ID that in the DB tables: words and songs
-    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
-    cursor = connection.cursor()
-
-    #find last wordID to continue from it
-    sql_max_wordID= """select wordID
-                        from words
-                        where word = ?"""
-
-    cursor.execute(sql_max_wordID, word)
-    wordID = cursor.fetchone()
-
-    cursor.close()
-    connection.close()
-
-    if (wordID == None): # first row
-        return -1
-    else:
-        return wordID.wordID
 
 
 def get_last_id_from_group_table():
@@ -148,82 +151,208 @@ def get_last_id_from_group_table():
         return 0
     else:
         return last_groupID.max
+#----------------------last ID's from tables---------------------#
 
 
 
-def concatenate__into_str(df):
-    str1 = ''
-    print(df)
+#------------------------details from tables---------------------#
+def get_song_name(songID):
+    # return DataFrame of all words from DB with the speciefic index
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
 
-    prev = 0
-    current = 0
-    start = True
+    # get word indexes from DB by given paragraph and line
+    sql_frequency_table =  """SELECT song
+                                FROM [FinalProject].[dbo].[songs]
+                                WHERE songID = ?"""
+    cursor.execute(sql_frequency_table, songID)
+        # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        song = row.song
+    else:
+        song = -1
+
+    cursor.close()
+    connection.close()
+    return song
+
+
+def get_song_link(songID):
+    # return DataFrame of all words from DB with the speciefic index
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    # get word indexes from DB by given paragraph and line
+    sql_frequency_table =  """SELECT txtlink
+                                FROM [FinalProject].[dbo].[songs]
+                                WHERE songID = ?"""
+    cursor.execute(sql_frequency_table, songID)
+
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        txtlink = row.txtlink
+    else:
+        txtlink = -1
+
+    cursor.close()
+    connection.close()
+    return txtlink
+    
+
+def get_line_from_song(songID, line):
+    path = get_song_link(songID)
+    with open(path, encoding="utf-8") as file:
+        song_in_lines = file.readlines()
+    song_in_lines = [line for line in song_in_lines if line != '\n']
+    song_in_lines = [""] + song_in_lines
+
+    if(line < len(song_in_lines)):
+        return song_in_lines[line]
+    else:
+        return ""
+#------------------------details from tables---------------------#
+
+    
+
+#---------------------------text functions-----------------------#
+def df_to_text(df):
+    context_str = ""
+    if len(df)>0:
+        current_song = df.loc[0]["songID"]
+        current_par = df.loc[0]["paragraph"]
+        context_str += "------> "+ get_song_name(int(df.loc[0]["songID"])) + "\n"
+    
     for index, row in df.iterrows():
-        if(start):
-            str1 += "--" + row.song + ", paragraph: " + str(row.paragraph) + "\n"
-            prev = row.line
-            start = False
-            str1 += row.word + " "
-            pass
-        else: 
-            current = row.line
-            if (current - 1 == prev):
-                str1 += "\n"
-            if (current - 1 > prev):
-                str1 += "\n\n"
-                str1 += "--" + row.song + ", paragraph: " + str(row.paragraph) + "\n"
-            str1 += row.word + " "
-        prev = row.line
-    return str1
+        context_str += get_line_from_song(int(row["songID"]), int(row["line"]))
+        if row["songID"] == current_song and row["paragraph"] != current_par:
+            current_par = row["paragraph"]
+            context_str += "\n"
+        if row["songID"] != current_song:
+            current_song = row["songID"]
+            current_par = row["paragraph"]
+            context_str += "\n\n------> "+ get_song_name(int(row["songID"])) + "\n"
+    return context_str
 
 
-def concatenate__into_str2(df, phrase):
-    # for each appreacnce - _deatails * appearace
-    str1 = ''
-    prev = 0
-    current = 0
-    start = True
-    for index, row in df.iterrows():
-        if(start):
-            str1 += "-" + row.song + ", paragraph: " + str(row.paragraph) + "*\n"
-            prev = row.line
-            start = False
-            str1 += row.word + " "
-            pass
-        else: 
-            current = row.line
-            if (current - 1 > prev):
-                str1 += "_"
-                str1 += "-" + row.song + ", paragraph: " + str(row.paragraph) + "*\n"
+def get_context_of_word_df(word):
+    word = word.lower()
+    # return DataFrame of all words from DB the located in the prev, cur, and next line of a given word
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
 
-            str1 += row.word + " "
-        prev = row.line
- 
-    return str1
+    sql_query = """select s.[songID]
+                        ,[paragraph]
+                        ,[line]
+                    from [FinalProject].[dbo].[wordIndex]
+                    left join [FinalProject].[dbo].[words] on [words].wordID = [wordIndex].wordID
+                    left join [FinalProject].[dbo].[songs] as s on s.songID = [wordIndex].songID
+                    where  wordIndex.line in (select line - 1 
+                                                FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
+                                                WHERE [words].wordID = [wordIndex].wordID and
+                                                    s.songID = [wordIndex].songID and
+                                                        [words].word = ?
+
+                                                union
+
+                                                select line 
+                                                FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
+                                                WHERE [words].wordID = [wordIndex].wordID and
+                                                s.songID = [wordIndex].songID and
+                                                        [words].word = ?
+
+                                                union 
+
+                                                select line + 1
+                                                FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
+                                                WHERE [words].wordID = [wordIndex].wordID and
+                                                s.songID = [wordIndex].songID and
+                                                        [words].word = ?)
+                    group by s.songID, paragraph, line
+                    order by [songID], paragraph, line"""
+
+    cursor.execute(sql_query,word, word, word)
+
+    # define DF according to the SQL query
+    df_context_of_word = pandas.DataFrame(columns=["songID", "paragraph", "line"])
+    
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        while row is not None:
+            df_context_of_word.loc[len(df_context_of_word)] = [
+                                                     row.songID,
+                                                     row.paragraph,
+                                                     row.line]
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    return df_context_of_word
 
 
-def seperate_string_to_lines(context, phrase):
-    str = ""
-    for element in context:
-        deatails = element.split("*")[0]
-        appearance = element.split("*")[1]
-        print(appearance + "\n")
-        new_appearance = ""
-        if phrase in appearance:
-            str += "--" + deatails + "\n"
-            appearance_list = appearance.split()
-            count_words = 1
-            for word in appearance_list:
-                new_appearance += word + " "
-                if (count_words %10 == 0) and len(appearance_list) - count_words >6:
-                    new_appearance += "\n"
-                count_words += 1
-            str += new_appearance
-            str += "\n\n"
-            new_appearance = ""
-            
-    return str
+def get_words_in_next_prev_lines(word):
+    word = word.lower()
+    # return DataFrame of all words from DB the located in the prev, cur, and next line of a given word
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
 
+    sql_query = """select word
+                        ,wordIndex.[wordID]
+                        ,[song]
+                        ,wordIndex.[songID]
+                        ,[paragraph]
+                        ,[line]
+                        ,[indexNum]
+                    from [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words], [FinalProject].[dbo].[songs] as s
+                    where [words].wordID = [wordIndex].wordID and 
+                            s.songID = [wordIndex].songID and
+                            wordIndex.line in (select line - 1 
+                                                FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
+                                                WHERE [words].wordID = [wordIndex].wordID and
+													s.songID = [wordIndex].songID and
+                                                        [words].word = ?
 
-# USE ME: int(get_first_lineNum_in_paragraph(2)["firstLine"][0])
+                                                union
+
+                                                select line 
+                                                FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
+                                                WHERE [words].wordID = [wordIndex].wordID and
+												s.songID = [wordIndex].songID and
+                                                        [words].word = ?
+
+                                                union 
+
+                                                select line + 1
+                                                FROM [FinalProject].[dbo].[wordIndex], [FinalProject].[dbo].[words]
+                                                WHERE [words].wordID = [wordIndex].wordID and
+												s.songID = [wordIndex].songID and
+                                                        [words].word = ?)
+                    order by [songID], [indexNum]"""
+
+    cursor.execute(sql_query,word, word, word)
+
+    # define DF according to the SQL query
+    wordsIndex_inRange_df = pandas.DataFrame(columns=["word", "wordID", "song", "songID", "paragraph", "line", "indexNum"])
+    
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        while row is not None:
+            wordsIndex_inRange_df.loc[len(wordsIndex_inRange_df)] = [row.word,
+                                                     row.wordID,
+                                                     row.song,
+                                                     row.songID,
+                                                     row.paragraph,
+                                                     row.line,
+                                                     row.indexNum]
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return wordsIndex_inRange_df
+#---------------------------text functions-----------------------#
+
 

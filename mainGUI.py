@@ -11,7 +11,7 @@ from LoadTXT import *
 from tkinter import PhotoImage
 from auxiliaryQueries import *
 
-# fonts and colors:
+#region Const
 PURPLE = "#7B2869"
 BLUE = "#9D3C72"
 PINK = "#FFBABA"
@@ -22,10 +22,12 @@ FONT_BODY = ("Verdana", 12, "bold")
 FONT1 = ("Verdana", 30, "bold italic")
 FONT2 = ("Verdana", 10, "bold")
 FONT3 = ("Verdana", 20, "bold")
-FONTB = ("Ariel", 10, "bold")
+FONTB = ("Gill Sans MT", 10, "bold")
 FONTB2 = ("JasmineUPC", 9, "bold")
+FONT4 = ("Verdana", 10, "bold underline")
+#endregion
 
-# Create the main window
+#region Create the main window
 window = tk.Tk()
 window.config(bg=YELLOW)
 window.title("Daniela Babi")
@@ -33,23 +35,22 @@ window.state("zoomed")
 screen_width = window.winfo_screenwidth()
 screen_height = window.winfo_screenheight()
 
-# Page Title
 image = PhotoImage(file="logo1.png")
 image = image.subsample(2)
 title = tk.Label(window, image=image, borderwidth=0)
 title.pack()
+#endregion
 
-# Create the first container - MENU
-menu_frame = tk.Frame(window, height=screen_height, width=screen_width*(1/10), background=BLUE)
+#region Create the containers - MENU, SEARCH and RESULTS
+menu_frame = tk.Frame(window, height=screen_height, width=screen_width*(1/10), background=BLUE, border=5)
 menu_frame.pack(side='left',fill=tk.BOTH)
 
-# Create the second container - SEARCH
-search_frame = tk.Frame(window, height=screen_height, width=screen_width*(2/10), background=PINK)
+search_frame = tk.Frame(window, height=screen_height, width=screen_width*(2/10), background=PINK, borderwidth=5)
 search_frame.pack(side='left', fill=tk.BOTH)
 
-# Create the third container - RESULTS
-result_frame = tk.Frame(window, height=screen_height, width=screen_width*(7/10), background=YELLOW)
+result_frame = tk.Frame(window, height=screen_height, width=screen_width*(7/10), background=YELLOW, border=5)
 result_frame.pack(side='left',fill=tk.BOTH, expand=True)
+#endregion
 
 def load_new_song():
     src = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
@@ -80,6 +81,7 @@ def show_result_table(df):
     # pack the treeview widget
     treeview.pack(expand=True, fill='both')
 
+
 def no_result_found():
     # Clear the content frame
     for widget in result_frame.winfo_children():
@@ -92,7 +94,8 @@ def no_result_found():
                     background=YELLOW)
     label.pack()
 
-#-------------------songs - SEARCH BUTTONS-------------------#
+
+#region Songs Tab
 def search_by_song_button_result(name1):
     # Clear the content frame
     for widget in result_frame.winfo_children():
@@ -141,8 +144,10 @@ def read_song_on_click():
         text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     else:
         no_result_found()
+#endregion
 
-#-------------------words - SEARCH BUTTONS-------------------#
+
+#region Words Tab
 def search_word_result(word):
     df = get_speciefic_word(word)
     if(len(df)==0):
@@ -163,10 +168,31 @@ def search_word_by_stem(word):
         no_result_found()
     else:
         show_result_table(df)
+#endregion
 
-#-------------------word indexes - SEARCH BUTTONS-------------------#
+
+#region WordIndex Tab
 def search_word_by_index_result(paragraph, line):
-    df = get_word_by_Index(paragraph, line)
+    if paragraph == "":
+        try:
+            line = int(line)
+        except:
+            tk.messagebox.showerror("error", "You must enter a number")
+        df = get_word_by_line(line)
+    elif line == "":
+        try:
+            paragraph = int(paragraph)
+        except:
+            tk.messagebox.showerror("error", "You must enter a number")
+        df = get_word_by_paragraph(paragraph)
+    else:
+        try:
+            paragraph = int(paragraph)
+            line = int(line)
+        except:
+            tk.messagebox.showerror("error", "You must enter a number")
+        df = get_word_by_Index(paragraph, line)
+    
     if(len(df)==0):
         no_result_found()
     else:
@@ -186,17 +212,16 @@ def search_index_of_group_result(group):
     else:
         show_result_table(df)
 
-def search_range_word_result(word):
+def search_range_word_result(word): 
     # Clear the content frame
     for widget in result_frame.winfo_children():
         widget.destroy()
     
-    range_string = concatenate__into_str(get_words_in_next_prev_lines(word))
+    range_string = concatenate_context_of_word(word)
     if range_string != "":
         scrollbar = tk.Scrollbar(result_frame)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        range_string = range_string.replace(word, " **" + word + "** ")
         # Create a Text widget
         text = tk.Text(result_frame, yscrollcommand=scrollbar.set)
         text.insert(tk.END, range_string)
@@ -205,9 +230,10 @@ def search_range_word_result(word):
 
     else:
         no_result_found()
+#endregion
 
 
-#-------------------group - SEARCH BUTTONS-------------------#
+#region Group Tab
 def search_group_result(group):
     df = get_speciefic_group(group)
     if(len(df)==0):
@@ -236,23 +262,36 @@ def refresh_groups():
 
 def create_group_from_db(groupName):
     selected_rows = treeview.selection()
-    # Get the data of the selected rows
-    data = []
-    for row in selected_rows:
-        item = treeview.item(row)
-        data.append(item['values'][1])
-    define_group(groupName, data)
-    
-    massage = groupName + ": " + str(data)
-    messagebox.showinfo('new group', "new group added: \n"+massage)
+    if groupName == "":
+        tk.messagebox.showerror("error", "You must add group name")
+    elif len(selected_rows) == 0:
+        tk.messagebox.showerror("error", "You must choose words from the list")
+    else:
+        # Get the data of the selected rows
+        data = []
+        for row in selected_rows:
+            item = treeview.item(row)
+            data.append(item['values'][1])
+        define_group(groupName, data)
+        
+        massage = groupName + ": " + str(data)
+        messagebox.showinfo('new group', "new group added: \n"+massage)
     
 def create_group_from_text(groupName, data):
-    define_group(groupName, data)
-    
-    massage = groupName + ": " + ", ".join(data)
-    messagebox.showinfo('new group', "new group added: \n"+massage)
+    print(data)
+    if groupName == "":
+        tk.messagebox.showerror("error", "You must add group name")
+    elif data == ['','']:
+        tk.messagebox.showerror("error", "You must choose words from the list")
+    else:
+        define_group(groupName, data)
+        
+        massage = groupName + ": " + ", ".join(data)
+        messagebox.showinfo('new group', "new group added: \n"+massage)
+#endregion
 
-#-------------------phrase - SEARCH BUTTONS-------------------#
+
+#region Phrase Tab
 def search_phrase_result(phrase):
     df = get_speciefic_phrase(phrase)
     if(len(df)==0):
@@ -271,7 +310,7 @@ def search_phrase_in_song_result (phrase):
     for widget in result_frame.winfo_children():
         widget.destroy()
 
-    range_string = search_phrase_in_songs(phrase)
+    range_string = concatenate_context_of_phrase(phrase)
     if range_string != "":
         scrollbar = tk.Scrollbar(result_frame)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -286,18 +325,25 @@ def search_phrase_in_song_result (phrase):
         no_result_found()
     
 def create_phrase_from_text(name, phrase):
-    define_phrase(name, phrase)
-    
-    massage = name + ": " + phrase
-    messagebox.showinfo('new phrase', "new phrase added: \n"+massage)
+    if name == "":
+        tk.messagebox.showerror("error", "You must add phrase name")
+    elif phrase == "":
+        tk.messagebox.showerror("error", "You must add phrase")
+    else:
+        define_phrase(name, phrase)        
+        massage = name + ": " + phrase
+        messagebox.showinfo('new phrase', "new phrase added: \n"+massage)
+#endregion
 
-#-------------------Statistics - SEARCH BUTTONS-------------------#
+
+#region Statistic Tab
 def by_paragraph_statistics(song):
     df = statistic_words_in_paragraphs(song)
     if(len(df)==0):
         no_result_found()
     else:
         show_result_table(df)
+
 
 def by_line_statistics(song):
     df = statistic_words_in_lines(song)
@@ -306,18 +352,56 @@ def by_line_statistics(song):
     else:
         show_result_table(df)
 
+
 def by_word_statistics(song):
     count = statistic_words_in_song(song)
     if (count == None):
         no_result_found()
     else:
-        popup = tk.Toplevel()
-        popup.title(song)
+        for widget in result_frame.winfo_children():
+            widget.destroy()
 
         massage = str(count) + " words in the song: " + song
-        # Add a label to the pop-up window with the string "Hello, world!"
-        label = tk.Label(popup, text=massage, font=("Arial", 30))
+        label = tk.Label(result_frame, 
+                        text=massage,
+                        font=FONT3,
+                        fg=PURPLE,
+                        background=YELLOW)
         label.pack()
+
+
+def chars_by_word_statistics(song):
+    count = statistic_chars_in_song(song)
+    if (count == None):
+        no_result_found()
+    else:
+        for widget in result_frame.winfo_children():
+            widget.destroy()
+
+        massage = str(count) + " characters in the song: " + song
+        label = tk.Label(result_frame, 
+                        text=massage,
+                        font=FONT3,
+                        fg=PURPLE,
+                        background=YELLOW)
+        label.pack()
+
+
+def chars_by_line_statistics(song):
+    df = statistic_chars_in_lines(song)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
+
+
+def chars_by_paragraph_statistics(song):
+    df = statistic_chars_in_paragraphs(song)
+    if(len(df)==0):
+        no_result_found()
+    else:
+        show_result_table(df)
+
 
 def frequency_list_statistics():
     df = statistic_word_frequency_list()
@@ -325,9 +409,10 @@ def frequency_list_statistics():
         no_result_found()
     else:
         show_result_table(df)
+#endregion
 
 
-#-------------------SEARCH FRAME-------------------#
+#region Search Frame
 def show_songs_search():
     # Clear the content frame
     for widget in search_frame.winfo_children():
@@ -511,37 +596,39 @@ def show_groups_search():
     line = tk.Label(search_frame, text='__________________________', background=PINK)
     line.pack(pady=15)
 
-    # > INSERT NEW GROUPS
 
-    label = tk.Label(search_frame, text='Select or Type \n words to create\n new group',
-                    font=FONT2, background=PINK)
-    label.pack()
-    
-    # open word list to choose
-    add_group_button = tk.Button(search_frame, text='words list', background=PINK,
-                                    command=words_for_group_button)
-    add_group_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
-    add_group_button.pack() 
+    # > INSERT NEW GROUPS
+    label = tk.Label(search_frame, text='Create new group',
+                    font=FONT4, background=PINK)
+    label.pack(pady=5)
 
     # enter group name
-    label = tk.Label(search_frame, text='Group Name', background=PINK)
+    label = tk.Label(search_frame, text='Group name', background=PINK)
     label.pack()
     new_group_entry = tk.Entry(search_frame)
-    new_group_entry.pack()
+    new_group_entry.pack(pady=5)
 
     # -----> create group from selection
-    add_group_button = tk.Button(search_frame, text='from selection',
+    label = tk.Label(search_frame, text='1. Choose words \nfrom word list', background=PINK, font=FONT2)
+    label.pack()
+    link = tk.Label(search_frame, text="open word list", fg="blue", cursor="hand2", background=PINK)
+    link.pack()
+    link.bind("<Enter>", lambda e: link.config(fg="purple"))
+    link.bind("<Leave>", lambda e: link.config(fg="blue"))
+    link.bind("<Button-1>", lambda e: words_for_group_button())
+
+    add_group_button = tk.Button(search_frame, text='create',
                                     command=lambda: create_group_from_db(new_group_entry.get()))
     add_group_button.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     add_group_button.pack() 
-    label = tk.Label(search_frame, text='Words', background=PINK)
+    
+    # -----> create group from text
+    label = tk.Label(search_frame, text='2. Enter words', background=PINK, font=FONT2)
     label.pack(pady=5)
     text = tk.Text(search_frame, width=15, height=9)
     text.pack()
 
-    # -----> create group from text
-
-    add_group_button1 = tk.Button(search_frame, text='from text',
+    add_group_button1 = tk.Button(search_frame, text='create',
                 command=lambda: create_group_from_text(new_group_entry.get(), (text.get('1.0', 'end').split('\n'))))
     add_group_button1.configure(fg=PURPLE, bg=YELLOW2, font=FONTB2)
     add_group_button1.pack(pady=5)
@@ -552,7 +639,9 @@ def show_phrases_search():
         widget.destroy()
 
     # -----> search phrase by name
-    label = tk.Label(search_frame, text='Phrase Name', background=PINK)
+    label = tk.Label(search_frame, text='Phrase by name', font=FONT2, background=PINK)
+    label.pack() 
+    label = tk.Label(search_frame, text='phrase', background=PINK)
     label.pack()  
     phrase_name_entry = tk.Entry(search_frame)
     phrase_name_entry.pack()
@@ -578,7 +667,7 @@ def show_phrases_search():
     line.pack()
 
     # -----> search phrase in songs and show context
-    label = tk.Label(search_frame, text='Phrase in songs', font=FONT2, background=PINK)
+    label = tk.Label(search_frame, text='Write a phrase \nto see its context\n in the songs', font=FONT2, background=PINK)
     label.pack()  
     label = tk.Label(search_frame, text='phrase', background=PINK)
     label.pack()  
@@ -592,8 +681,8 @@ def show_phrases_search():
     line.pack(pady=15)
 
     # > INSERT NEW PHRASES
-    label = tk.Label(search_frame, text='Type words\n to create\n new phrase',
-                    font=FONT2, background=PINK)
+    label = tk.Label(search_frame, text='Create new phrase',
+                    font=FONT4, background=PINK)
     label.pack()
 
     # -----> crate phrase
@@ -617,12 +706,21 @@ def show_statistics_search():
     for widget in search_frame.winfo_children():
         widget.destroy()
 
+    frequency_button = tk.Button(search_frame, text='Full Frequency List', background=YELLOW,
+                                    command=frequency_list_statistics)
+    frequency_button.pack(pady=10)
+
+    line = tk.Label(search_frame, text='__________________________', background=PINK)
+    line.pack()
     # Create the entries and button, and add them to the second container
-    label = tk.Label(search_frame, text='Song Statistics', font=FONT2, background=PINK)
+    label = tk.Label(search_frame, text='Choose song to \n get its statistics', font=FONT2, background=PINK)
     label.pack()  
     song_entry = tk.Entry(search_frame)
-    song_entry.pack()
+    song_entry.pack(pady=10)
 
+    # --------------- Words statistics
+    label = tk.Label(search_frame, text='Words Statistics', font=FONT4, background=PINK)
+    label.pack() 
     paragraph_stats_button = tk.Button(search_frame, text='By Paragraphs',
                                     command=lambda: by_paragraph_statistics(song_entry.get()))
     paragraph_stats_button.configure(width=11, background=YELLOW2)
@@ -638,12 +736,28 @@ def show_statistics_search():
     song_stats_button.configure(width=11, background=YELLOW2)
     song_stats_button.pack(pady=2)
 
-    frequency_button = tk.Button(search_frame, text='Full Frequency List', background=PURPLE,
-                                    command=frequency_list_statistics)
-    frequency_button.pack(pady=50)
+    # --------------- Characters statistics
+    label = tk.Label(search_frame, text='Charactes Statistics', font=FONT4, background=PINK)
+    label.pack() 
+    paragraph_stats_button = tk.Button(search_frame, text='By Paragraphs',
+                                    command=lambda: chars_by_paragraph_statistics(song_entry.get()))
+    paragraph_stats_button.configure(width=11, background=YELLOW2)
+    paragraph_stats_button.pack(pady=2)
+
+    line_stats_button = tk.Button(search_frame, text='By Lines',
+                                    command=lambda: chars_by_line_statistics(song_entry.get()))
+    line_stats_button.configure(width=11, background=YELLOW2)
+    line_stats_button.pack(pady=2)
+
+    song_stats_button = tk.Button(search_frame, text='By Words',
+                                    command=lambda: chars_by_word_statistics(song_entry.get()))
+    song_stats_button.configure(width=11, background=YELLOW2)
+    song_stats_button.pack(pady=2)
+
+#endregion
 
 
-#-------------------DEFAULT BUTTONS SHOW-------------------#
+#region Menu Frame
 def songs_button_default():
     # Clear the content frame
     for widget in result_frame.winfo_children():
@@ -695,9 +809,10 @@ def statistics_button_default():
         widget.destroy()
 
     show_statistics_search()
+#endregion
 
-# Create the buttons and add them to the first container
-#lambda: show_songs("Witness")
+
+#region Create the buttons and add them to the first container
 songs_button = tk.Button(menu_frame, text='Songs', command=songs_button_default)
 words_button = tk.Button(menu_frame, text='Words', command=words_button_default)
 indexes_button = tk.Button(menu_frame, text='Indexes', command=indexes_button_default)
@@ -706,7 +821,6 @@ phrases_button = tk.Button(menu_frame, text='Phrases', command=phrases_button_de
 statistics_button = tk.Button(menu_frame, text='Statistics', command=statistics_button_default)
 add_button = tk.Button(menu_frame, text='Add New Song', command=load_new_song)
 
-#----------------configure and pack the buttons
 songs_button.configure(width=12, font=FONTB, background=YELLOW)
 songs_button.pack()
 words_button.configure(width=12, font=FONTB, background=YELLOW)
@@ -721,6 +835,6 @@ statistics_button.configure(width=12, font=FONTB, background=YELLOW)
 statistics_button.pack()
 add_button.configure(width=12, font=FONTB, background=YELLOW)
 add_button.pack()
+#endregion
 
-# Start the main loop
 window.mainloop()

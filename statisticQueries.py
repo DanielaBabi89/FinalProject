@@ -117,4 +117,100 @@ def statistic_words_in_lines(song):
     connection.close()
     return words_in_line_df
 
-print(statistic_words_in_song("Withbmhbmness"))
+
+def statistic_chars_in_song(song):
+     # return DataFrame of all words from DB with the speciefic index
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    # get word indexes from DB by given paragraph and line
+    sql_frequency_table =  """SELECT sum(length) as song_length
+                                FROM [FinalProject].[dbo].[wordIndex],
+                                    [FinalProject].[dbo].[songs],
+                                    [FinalProject].[dbo].[words]
+
+                                WHERE wordIndex.wordID = words.wordID and wordIndex.songID = songs.songID
+                                    and song = ?
+
+                                group by wordIndex.songID"""
+    cursor.execute(sql_frequency_table, song)
+
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        song_length = row.song_length
+    else:
+        song_length = -1
+
+    cursor.close()
+    connection.close()
+    return song_length
+
+
+def statistic_chars_in_paragraphs(song):
+     # return DataFrame of all words from DB with the speciefic index
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    # get word indexes from DB by given paragraph and line
+    sql_frequency_table =  """SELECT paragraph, sum(length) as length
+                            FROM [FinalProject].[dbo].[wordIndex],
+                                [FinalProject].[dbo].[songs],
+                                [FinalProject].[dbo].[words]
+
+                            WHERE wordIndex.wordID = words.wordID and wordIndex.songID = songs.songID
+                                and song = ?
+
+                            group by wordIndex.paragraph
+                            order by length DESC"""
+    cursor.execute(sql_frequency_table, song)
+    
+    # define DF according to the SQL query
+    chars_in_par_df = pandas.DataFrame(columns=["Paragraph Number", "Number of Characters"])
+    
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        while row is not None:
+            chars_in_par_df.loc[len(chars_in_par_df)] = [row.paragraph,
+                                            row.length]
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return chars_in_par_df
+
+
+def statistic_chars_in_lines(song):
+     # return DataFrame of all words from DB with the speciefic index
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    # get word indexes from DB by given paragraph and line
+    sql_frequency_table =  """SELECT line, sum(length) as length
+                            FROM [FinalProject].[dbo].[wordIndex],
+                                [FinalProject].[dbo].[songs],
+                                [FinalProject].[dbo].[words]
+
+                            WHERE wordIndex.wordID = words.wordID and wordIndex.songID = songs.songID
+                                and song = ?
+
+                            group by wordIndex.line
+                            order by length DESC"""
+    cursor.execute(sql_frequency_table, song)
+    
+    # define DF according to the SQL query
+    chars_in_line_df = pandas.DataFrame(columns=["Line Number", "Number of Characters"])
+    
+    # add all results from query to the DF
+    row = cursor.fetchone()
+    if(row != None):
+        while row is not None:
+            chars_in_line_df.loc[len(chars_in_line_df)] = [row.line,
+                                            row.length]
+            row = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+    return chars_in_line_df
+
