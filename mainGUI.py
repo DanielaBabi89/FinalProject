@@ -52,6 +52,7 @@ result_frame = tk.Frame(window, height=screen_height, width=screen_width*(7/10),
 result_frame.pack(side='left',fill=tk.BOTH, expand=True)
 #endregion
 
+
 def load_new_song():
     src = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
     src_splited = src.split("/")
@@ -95,7 +96,7 @@ def no_result_found():
     label.pack()
 
 
-#region Songs Tab
+#region 1) Songs Tab
 def search_by_song_button_result(name1):
     # Clear the content frame
     for widget in result_frame.winfo_children():
@@ -147,7 +148,7 @@ def read_song_on_click():
 #endregion
 
 
-#region Words Tab
+#region 2) Words Tab
 def search_word_result(word):
     df = get_speciefic_word(word)
     if(len(df)==0):
@@ -171,7 +172,7 @@ def search_word_by_stem(word):
 #endregion
 
 
-#region WordIndex Tab
+#region 3) WordIndex Tab
 def search_word_by_index_result(paragraph, line):
     if paragraph == "":
         try:
@@ -233,7 +234,7 @@ def search_range_word_result(word):
 #endregion
 
 
-#region Group Tab
+#region 4) Group Tab
 def search_group_result(group):
     df = get_speciefic_group(group)
     if(len(df)==0):
@@ -272,10 +273,11 @@ def create_group_from_db(groupName):
         for row in selected_rows:
             item = treeview.item(row)
             data.append(item['values'][1])
-        define_group(groupName, data)
+        df = define_group(groupName, data)
         
-        massage = groupName + ": " + str(data)
-        messagebox.showinfo('new group', "new group added: \n"+massage)
+        if len(df) != 0:
+            massage = groupName + ": " + str(data)
+            messagebox.showinfo('new group', "new group added: \n"+massage)
     
 def create_group_from_text(groupName, data):
     print(data)
@@ -291,7 +293,7 @@ def create_group_from_text(groupName, data):
 #endregion
 
 
-#region Phrase Tab
+#region 5) Phrase Tab
 def search_phrase_result(phrase):
     df = get_speciefic_phrase(phrase)
     if(len(df)==0):
@@ -336,7 +338,7 @@ def create_phrase_from_text(name, phrase):
 #endregion
 
 
-#region Statistic Tab
+#region 6) Statistic Tab
 def by_paragraph_statistics(song):
     df = statistic_words_in_paragraphs(song)
     if(len(df)==0):
@@ -494,7 +496,7 @@ def show_words_search():
     line.pack()
 
     # -----> search word in its range
-    label = tk.Label(search_frame, text='Range of Word', font=FONT2, background=PINK)
+    label = tk.Label(search_frame, text='Context of Word', font=FONT2, background=PINK)
     label.pack()
     label = tk.Label(search_frame, text='Word', background=PINK)
     label.pack()

@@ -587,29 +587,39 @@ def get_index_of_group(groupName):
                         and [wordIndex].[wordID] = [groupDetails].[wordID]
                         and [groupName] = ?"""
 
+    sql_query = """SELECT words.[word]
+                            ,songs.song
+                            ,[paragraph]
+                            ,[line]
+                            ,[indexNum]
+                                        
+                    FROM [FinalProject].[dbo].[wordIndex]
+                        , [FinalProject].[dbo].[group], 
+                        [FinalProject].[dbo].[groupDetails],
+                        [FinalProject].[dbo].[songs],
+                        [FinalProject].[dbo].[words] 
+
+
+                    WHERE [group].[groupID] = [groupDetails].[groupID] and
+                        [wordIndex].[wordID] = [groupDetails].[wordID] and
+                        [wordIndex].[wordID] = [words].[wordID] and
+                        songs.songID = wordIndex.songID and
+                        [groupName] = ?"""
+
     cursor.execute(sql_query, groupName)
 
     # define DF according to the SQL query
-    indexes_of_group_df = pandas.DataFrame(columns=["groupID"
-                                                ,"groupName"
-                                                ,"wordID"
-                                                ,"songID" 
-                                                ,"paragraph" 
-                                                ,"line"
-                                                ,"indexNum"])
-    
+    indexes_of_group_df = pandas.DataFrame(columns=["word", "song", "paragraph", "line", "indexNum"])
+
     # add all results from query to the DF
     row = cursor.fetchone()
     if(row != None):
         while row is not None:
-            indexes_of_group_df.loc[len(indexes_of_group_df)] = [
-                                                 row.groupID,
-                                                 row.groupName,
-                                                 row.wordID, 
-                                                 row.songID, 
-                                                 row.paragraph, 
-                                                 row.line, 
-                                                 row.indexNum]
+            indexes_of_group_df.loc[len(indexes_of_group_df)] = [row.word,
+                                                    row.song,
+                                                    row.paragraph,
+                                                    row.line,
+                                                    row.indexNum]
             row = cursor.fetchone()
 
     cursor.close()
@@ -733,7 +743,7 @@ def get_speciefic_phrase(phrase):
                                 [FinalProject].[dbo].[words]
                             WHERE [phraseDetails].wordID = [words].wordID 
                                     and [phraseDetails].phraseID = [phrase].phraseID
-                                    and [phraseDetails].phraseName = ?"""
+                                    and [phrase].phraseName = ?"""
 
     cursor.execute(sql_phrases_table, phrase)
     

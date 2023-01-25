@@ -83,6 +83,46 @@ def get_wordID(word):
         return -1
     else:
         return wordID.wordID
+
+
+def get_groupID(group):
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    sql_max_wordID= """select groupID
+                        from [FinalProject].[dbo].[group]
+                        where groupName = ?"""
+
+    cursor.execute(sql_max_wordID, group)
+    groupID = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    if (groupID == None): # first row
+        return -1
+    else:
+        return groupID.groupID
+
+
+def get_phraseID(phrase):
+    connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-3CCRSS4\SQLEXPRESS;DATABASE=FinalProject;Trusted_Connection=yes;')
+    cursor = connection.cursor()
+
+    sql_max_phraseID = """select phraseID
+                        from [FinalProject].[dbo].[phrase]
+                        where phraseName = ?"""
+
+    cursor.execute(sql_max_phraseID, phrase)
+    phraseID = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    if (phraseID == None): # first row
+        return -1
+    else:
+        return phraseID.phraseID
 #------------------------ID's from tables------------------------#
 
 
